@@ -1,0 +1,78 @@
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ==============================
+# Virtual Environment
+# ==============================
+venv/
+env/
+ENV/
+.venv/
+
+# ==============================
+# Environment variables
+# ==============================
+.env
+.env.*
+*.env
+
+# ==============================
+# Django
+# ==============================
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Migrations cache (keep migrations themselves!)
+**/__pycache__/
+
+# ==============================
+# Django REST Framework / API
+# ==============================
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+
+# ==============================
+# VS Code
+# ==============================
+.vscode/
+
+# ==============================
+# macOS / Windows
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Testing / coverage
+# ==============================
+.coverage
+htmlcov/
+.pytest_cache/
+
+# ==============================
+# Node (if using React frontend)
+# ==============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==============================
+# PyCharm
+# ==============================
+.idea/
