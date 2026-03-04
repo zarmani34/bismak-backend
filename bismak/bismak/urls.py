@@ -16,17 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from accounts.views import StaffRegisterView, AdminRegisterView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('dj_rest_auth.urls')),
-    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
-    path('api/auth/login/', include('dj_rest_auth.urls')),
-    path('api/auth/logout/', include('dj_rest_auth.urls')),
-    path('api/auth/reset/', include('dj_rest_auth.urls')),
-    path('api/auth/reset/confirm/', include('dj_rest_auth.urls')),
-    path('api/auth/user/', include('dj_rest_auth.urls')),
-    path('api/auth/registration/staff/', StaffRegisterView.as_view()),
-    path('api/auth/registration/admin/', AdminRegisterView.as_view()),
+    path('accounts/', include('allauth.urls')),
+    path('api/auth/', include('dj_rest_auth.urls')),  # covers everything login, logout, reset, reset/confirm, user
+    path('api/', include('accounts.urls')),
+    path('api/', include('projects.urls')),
 ]

@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     # Django apps
     'django.contrib.sites',   # REQUIRED for allauth
     'accounts',
+    'commmon',
+    'projects',
 
     # Third party
     'rest_framework',
@@ -148,10 +150,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 REST_AUTH = {
-    'REGISTER_SERIALIZER': 'accounts.serializers.CustomRegisterSerializer',
+    # 'REGISTER_SERIALIZER': 'accounts.serializers.CustomRegisterSerializer',
     'LOGIN_SERIALIZER': 'accounts.serializers.CustomLoginSerializer',
     'USER_DETAILS_SERIALIZER': 'accounts.serializers.CustomUserDetailsSerializer',
     'USE_JWT': True,
