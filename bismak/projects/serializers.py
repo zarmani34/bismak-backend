@@ -18,14 +18,17 @@ class AdminProjectSerializer(ProjectSerializer):
         read_only_fields = ["code", "owner", 'created_at']  # admin can edit status
         
 class ProjectAssignmentSerializer(serializers.ModelSerializer):
-    assignee_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='assignee', write_only=True)  # Use user ID for assignee
+    assignee_id = serializers.SlugRelatedField(queryset=User.objects.filter(role__in=['staff', 'admin']),
+        source='assignee',
+        slug_field='user_id',  
+        write_only=True)  
     assignee = UserSerializer(read_only=True)
     assigned_by = serializers.StringRelatedField(read_only=True)
     project = serializers.CharField(source="project.code", read_only=True)
     company = serializers.CharField(source="project.company", read_only=True)
     class Meta:
         model = ProjectAssignment
-        fields = ["project", "assignee", "assignment_role", "company", "project_id", 'assignee_id', 'assigned_by']  # project is read-only, assignee is read-only, company is read-only
+        fields = ["id", "project", "assignee", "assignment_role", "company", 'assignee_id', 'assigned_by']  # project is read-only, assignee is read-only, company is read-only
         
 class TimelineEventSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)

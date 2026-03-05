@@ -3,6 +3,8 @@ from django.shortcuts import render
 # Create your views here.
 from dj_rest_auth.registration.views import RegisterView
 from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .models import User
 from .serializers import  ClientRegisterSerializer, StaffRegisterSerializer, AdminRegisterSerializer, UserSerializer
@@ -28,6 +30,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.request.user.role == 'client':
             return User.objects.filter(id=self.request.user.id) # for now use id and change to user_id later
         return User.objects.all()
+    
+    @action(detail=False, methods=['get'], url_path='assignable')
+    def assignable_users(self, request):
+        users = User.objects.filter(role__in=['staff', 'admin'])
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
             
 
 

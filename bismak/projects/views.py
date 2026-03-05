@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets
 from .models import Project, ProjectAssignment, TimelineEvent
 from .serializers import ProjectSerializer, ProjectAssignmentSerializer, AdminProjectSerializer, TimelineEventSerializer
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from commmon.permissions import IsAdminOrStaff
 # from 
@@ -93,3 +93,10 @@ class BaseProjectTypeViewSet(viewsets.ModelViewSet):
         
         # Project will be in two views 
         # for users like staf to request project and for admin or staff to update
+        
+        
+# On assigning a project to a user, we should update the project status to in progress
+# Upon executing projects e.e leaktest, calibration etc, 
+# on save project.status should be updated to completed and when the test is completed, it should be updated to completed. 
+# This can be done by overriding the save method of the respective test models and updating the project status accordingly.
+# we need a logic to update project status to completed, on hold or cancelled as well, this can be done by creating a separate endpoint for updating project status and allowing only admin to update it.

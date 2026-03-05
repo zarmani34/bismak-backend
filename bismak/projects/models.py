@@ -70,7 +70,6 @@ class ProjectAssignment(UUIDTimeStampedModel):
     def __str__(self):        
         return f"{self.project.code} | {self.assignee.get_full_name()} | {self.assignment_role}"
     
-    
 
 class TimelineEvent(UUIDTimeStampedModel):
     project = models.ForeignKey(Project, related_name='events', on_delete=models.CASCADE)
