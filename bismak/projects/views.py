@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from .models import Project, ProjectAssignment, TimelineEvent, ProjectStatus
 from .serializers import ProjectAssignmentSerializer, TimelineEventSerializer, ProjectDetailSerializer, ProjectListSerializer
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from commmon.permissions import IsAdminOrStaff
 from rest_framework.decorators import action
@@ -105,7 +104,7 @@ class ProjectAssignmentViewSet(viewsets.ModelViewSet):
         TimelineEvent.objects.create(
             project=project,
             title="Project Assigned",
-            description=f"Project assigned to {serializer.validated_data['assignee'].get_full_name()} with role {serializer.validated_data.get('assignment_role', 'N/A')}",
+            description=f"Project assigned to {serializer.validated_data['assignee'].get_full_name()}, role is: {serializer.validated_data.get('assignment_role', 'N/A')}",
             created_by=self.request.user
         )
         
