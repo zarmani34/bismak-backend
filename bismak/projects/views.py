@@ -1,12 +1,13 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from .models import Project, ProjectAssignment, TimelineEvent
+from .models import Project, ProjectAssignment, TimelineEvent, ProjectStatus
 from .serializers import ProjectSerializer, ProjectAssignmentSerializer, AdminProjectSerializer, TimelineEventSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from commmon.permissions import IsAdminOrStaff
-# from 
-
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 # Create your views here.
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -32,6 +33,58 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return AdminProjectSerializer  # admin gets full access
         return ProjectSerializer
     
+    @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdminOrStaff])
+    def update_status(self, request, **kwargs):
+        project = self.get_object()
+        new_status = request.data.get('status')
+        VALID_TRANSITIONS = {
+        'planning':    ['in_progress', 'cancelled'],
+        'in_progress': ['on_hold', 'completed', 'cancelled'],
+        'on_hold':     ['in_progress', 'cancelled'],
+        'completed':   [],
+        'cancelled':   [],
+        }
+
+        # check status was provided
+        if not new_status:
+            return Response(
+                {'error': 'Status is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if new_status not in ProjectStatus.values:
+            return Response(
+                {'error': f'Invalid status. Valid choices are {ProjectStatus.values}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        allowed_transitions = VALID_TRANSITIONS.get(project.status, [])
+        if new_status not in allowed_transitions:
+            return Response(
+                {
+                    'error': f'Cannot transition from {project.status} to {new_status}.',
+                    'allowed_transitions': allowed_transitions
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        old_status = project.status
+        project.status = new_status
+        project.save()
+
+        TimelineEvent.objects.create(
+            project=project,
+            title="Status Updated",
+            description=f"Status changed from {old_status} to {new_status}",
+            created_by=request.user
+        )
+
+        return Response({
+            'message': 'Status updated successfully',
+            'old_status': old_status,
+            'new_status': new_status,
+            'allowed_transitions': VALID_TRANSITIONS.get(new_status, [])
+        })
 
 class ProjectAssignmentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrStaff]
