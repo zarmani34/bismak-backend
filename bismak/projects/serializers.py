@@ -11,7 +11,21 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = "__all__"
         read_only_fields = ["code", "owner", 'status', 'created_at']  # code is auto-generated, created_by is set in the view, status is read-only for non-admins
-    
+
+class ProjectListSerializer(serializers.ModelSerializer):
+    owner = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    details_url = serializers.HyperlinkedIdentityField(view_name='project-detail', lookup_field='code')
+
+    class Meta:
+        model = Project
+        fields = [
+            'code', 'name', 'company', 'location', 'details_url',
+            'status', 'status_display', 'due_date', 'owner', 'created_at'
+        ]
+
+    def get_owner(self, obj):
+        return obj.owner.get_full_name() if obj.owner else None
 
 class AdminProjectSerializer(ProjectSerializer):
     class Meta(ProjectSerializer.Meta):
@@ -66,3 +80,23 @@ class PressureTestSerializer(serializers.ModelSerializer):
             'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'project']
+        
+        
+class ProjectDetailSerializer(serializers.ModelSerializer):
+    owner = UserSerializer(read_only=True)
+    assignments = ProjectAssignmentSerializer(many=True, read_only=True)
+    events = TimelineEventSerializer(many=True, read_only=True)
+    pressure_test = PressureTestSerializer(read_only=True)
+    # leak_test = LeakTestSerializer(read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Project
+        fields = [
+            'id', 'code', 'name', 'company', 'location',
+            'status', 'status_display',
+            'due_date', 'description', 'owner',
+            'assignments', 'events', 'pressure_test',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'code', 'owner', 'status', 'created_at', 'updated_at']

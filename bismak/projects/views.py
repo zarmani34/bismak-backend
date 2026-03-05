@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from .models import Project, ProjectAssignment, TimelineEvent, ProjectStatus
-from .serializers import ProjectSerializer, ProjectAssignmentSerializer, AdminProjectSerializer, TimelineEventSerializer
+from .serializers import ProjectAssignmentSerializer, TimelineEventSerializer, ProjectDetailSerializer, ProjectListSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from commmon.permissions import IsAdminOrStaff
@@ -11,8 +11,6 @@ from rest_framework import status
 # Create your views here.
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
     # filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     # filterset_fields = ['status', 'location', 'client']
     # search_fields = ['name', 'owner__first_name']
@@ -24,14 +22,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Project.objects.all()
         return Project.objects.filter(owner=user)  # clients only see their own projects
     
+    
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
         
     def get_serializer_class(self):
-              
-        if self.request.user.role == "admin":
-            return AdminProjectSerializer  # admin gets full access
-        return ProjectSerializer
+        if self.action == 'list':
+            return ProjectListSerializer
+        return ProjectDetailSerializer
     
     @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdminOrStaff])
     def update_status(self, request, **kwargs):
@@ -103,6 +101,13 @@ class ProjectAssignmentViewSet(viewsets.ModelViewSet):
         
         if not project:
             raise PermissionDenied("Project not found.")
+        
+        TimelineEvent.objects.create(
+            project=project,
+            title="Project Assigned",
+            description=f"Project assigned to {serializer.validated_data['assignee'].get_full_name()} with role {serializer.validated_data.get('assignment_role', 'N/A')}",
+            created_by=self.request.user
+        )
         
         serializer.save(project=project, assigned_by=self.request.user)
 
