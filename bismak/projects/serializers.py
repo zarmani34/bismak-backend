@@ -25,9 +25,10 @@ class ProjectListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = [
-            'code', 'name', 'company', 'location', 'details_url',
+            'code', 'name', 'company', 'location', 'details_url', 'type',
             'status', 'status_display', 'due_date', 'owner', 'created_at'
         ]
+        read_only_fields = ['code', 'owner', 'status', 'created_at', 'type']  # code is auto-generated, owner is set in the view, status is read-only for non-admins
 
     def get_owner(self, obj):
         return obj.owner.get_full_name() if obj.owner else None
@@ -59,6 +60,7 @@ class TimelineEventSerializer(serializers.ModelSerializer):
     
 class PressureTestSerializer(serializers.ModelSerializer):
     project = serializers.CharField(source="project.code", read_only=True)
+    result_display = serializers.CharField(source='get_result_display', read_only=True) 
     class Meta:
         model = PressureTest
         # fields = "__all__"
@@ -141,10 +143,10 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             'id', 'code', 'name', 'company', 'location',
-            'status', 'status_display',
+            'status', 'status_display', 'type',
             'due_date', 'description', 'owner',
             'assignments', 'events', 'pressure_test',
             'leak_test',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'code', 'owner', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'code', 'owner', 'status', 'created_at', 'updated_at', 'type']

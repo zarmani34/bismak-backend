@@ -22,13 +22,18 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
     
     is_verified = serializers.SerializerMethodField()
     full_name = serializers.CharField(source='get_full_name')
+    portal = serializers.SerializerMethodField()
 
     def get_is_verified(self, obj):
         return EmailAddress.objects.filter(user=obj, verified=True).exists()
     
+    
+    def get_portal(self, obj):
+        return f"portal/{obj.role}/dashboard"
+    
     class Meta(UserDetailsSerializer.Meta):
-        fields = ['pk', 'email', 'full_name', 'phone_number', 'role', 'date_joined', 'last_login', 'is_verified']
-        read_only_fields = ('email','date_joined', 'last_login', 'is_verified', 'role', 'full_name')
+        fields = ['pk', 'email', 'full_name', 'phone_number', 'role', 'date_joined', 'last_login', 'is_verified', 'portal']
+        read_only_fields = ('email','date_joined', 'last_login', 'is_verified', 'role', 'full_name', 'portal')
         
 # class CustomRegisterSerializer(RegisterSerializer):
 #     username = None  # Remove username field

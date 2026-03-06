@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from .models import Project, ProjectAssignment, TimelineEvent, ProjectStatus
-from .serializers import ProjectAssignmentSerializer, TimelineEventSerializer, ProjectDetailSerializer, ProjectListSerializer
-from rest_framework.exceptions import PermissionDenied
+from .models import PressureTest, Project, ProjectAssignment, TimelineEvent, ProjectStatus
+from .serializers import ProjectAssignmentSerializer, TimelineEventSerializer, ProjectDetailSerializer, ProjectListSerializer, PressureTestSerializer, LeakTestSerializer
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from commmon.permissions import IsAdminOrStaff
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -128,10 +128,7 @@ class TimelineEventViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         
         project_code = self.kwargs.get('project_code')
-        project = Project.objects.filter(code=project_code).first()
-        
-        if not project:
-            raise PermissionDenied("Project not found.")
+        project = get_object_or_404(Project, code=project_code)
         
         serializer.save(created_by=self.request.user, project=project)
 
@@ -139,17 +136,52 @@ class BaseProjectTypeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrStaff]
     project_type = None
 
+    def get_queryset(self):
+        project_code = self.kwargs.get('project_code')
+        project = get_object_or_404(Project, code=project_code)
+        
+        return self.queryset.filter(project=project)
+        
     def perform_create(self, serializer):
-        project_code = self.kwargs.get('project_pk')
-        project = Project.objects.filter(code=project_code).first()
+        
+        project_code = self.kwargs.get('project_code')
+        project = get_object_or_404(Project, code=project_code)
+
+        if project.type is not None:
+            raise ValidationError(f'Project already has a {project.type} record.')
 
         project.type = self.project_type
+        project.status = 'in_progress'
         project.save()
+        
+        TimelineEvent.objects.create(
+            project=project,
+            title="Project Executed",
+            description=f"Project executed as: {self.project_type}, by {self.request.user.get_full_name()}",
+            created_by=self.request.user
+        )
+        
         serializer.save(project=project)
         
+    def perform_destroy(self, instance):
+        project = instance.project
+        instance.delete()
+        project.type = None
+        project.save()
+   
+class PressureTestViewSet(BaseProjectTypeViewSet):
+    project_type = 'pressure_test'
+    serializer_class = PressureTestSerializer
+    queryset = PressureTest.objects.all()
+
+
+class LeakTestViewSet(BaseProjectTypeViewSet):
+    project_type = 'leak_test'
+    serializer_class = LeakTestSerializer
+    queryset = PressureTest.objects.all()
         
-        # Project will be in two views 
-        # for users like staf to request project and for admin or staff to update
+# Project will be in two views 
+# for users like staff to request project and for admin or staff to update
         
         
 # On assigning a project to a user, we should update the project status to in progress
