@@ -29,7 +29,7 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
     
     
     def get_portal(self, obj):
-        return f"{obj.role}/dashboard"
+        return f"portal/{obj.role}/dashboard"
     
     class Meta(UserDetailsSerializer.Meta):
         fields = ['pk', 'email', 'full_name', 'phone_number', 'role', 'date_joined', 'last_login', 'is_verified', 'portal']
