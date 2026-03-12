@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from dj_rest_auth.serializers import LoginSerializer as DefaultLoginSerializer, UserDetailsSerializer
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.serializers import JWTSerializer
 from allauth.account.models import EmailAddress
 
 from accounts.models import Organisation, User
@@ -31,8 +32,9 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
     def get_portal(self, obj):
         return f"portal/{obj.role}/dashboard"
     
+    
     class Meta(UserDetailsSerializer.Meta):
-        fields = ['pk', 'email', 'full_name', 'phone_number', 'role', 'date_joined', 'last_login', 'is_verified', 'portal']
+        fields = ['pk', 'email', 'full_name', 'phone_number', 'role', 'date_joined', 'last_login', 'is_verified', 'portal', 'user_id']
         read_only_fields = ('email','date_joined', 'last_login', 'is_verified', 'role', 'full_name', 'portal')
         
 # class CustomRegisterSerializer(RegisterSerializer):
@@ -132,3 +134,13 @@ class ClientRegisterSerializer(RegisterSerializer):
         user.save()
         
         return user
+    
+    
+
+class CustomJWTSerializer(JWTSerializer):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # remove tokens from response body
+        data.pop('access', None)
+        data.pop('refresh', None)
+        return data

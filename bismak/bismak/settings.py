@@ -152,7 +152,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 REST_AUTH = {
@@ -165,6 +167,8 @@ REST_AUTH = {
     'JWT_AUTH_HTTPONLY': False,  # Set to True in production
     'JWT_AUTH_SECURE': False,  # Set to True in production (HTTPS)
     'JWT_AUTH_SAMESITE': None,
+    'JWT_SERIALIZER': 'accounts.serializers.CustomJWTSerializer',
+    # 'JWT_AUTH_COOKIE_DOMAIN': '192.168.43.215',
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -185,5 +189,12 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Set to 'mandatory' in production
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://192.168.43.215:3000"]
 CORS_ALLOW_CREDENTIALS = True
+
+# settings.py
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "192.168.43.215", 
+]

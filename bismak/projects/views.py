@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+
+from accounts.models import User
 from .models import PressureTest, Project, ProjectAssignment, TimelineEvent, ProjectStatus
 from .serializers import ProjectAssignmentSerializer, TimelineEventSerializer, ProjectDetailSerializer, ProjectListSerializer, PressureTestSerializer, LeakTestSerializer
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from commmon.permissions import IsAdminOrStaff
+from commmon.permissions import IsAdminOrStaff, IsAdmin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +17,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
     # search_fields = ['name', 'owner__first_name']
     lookup_field = 'code'  # Use code instead of id for lookups
     
+    def get_project(self):
+        project_code = self.kwargs.get('project_code')
+        return get_object_or_404(Project, code=project_code)
+    
     def get_queryset(self):
         user = self.request.user
         if user.role in ('staff', 'admin'):
@@ -23,14 +29,25 @@ class ProjectViewSet(viewsets.ModelViewSet):
     
     
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        user = self.request.user
+    
+        if user.role == 'client':
+            serializer.save(owner=user)  # owner is themselves
+            
+        elif user.role in ('admin', 'staff'):
+            owner_id = self.request.data.get('owner')  # admin provides owner
+            if not owner_id:
+                raise ValidationError({'owner': 'Owner is required when creating project as admin.'})
+            
+            owner = get_object_or_404(User, user_id=owner_id, role='client')  # must be a client
+            serializer.save(owner=owner)
         
     def get_serializer_class(self):
         if self.action == 'list':
             return ProjectListSerializer
         return ProjectDetailSerializer
     
-    @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdminOrStaff])
+    @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdmin])
     def update_status(self, request, **kwargs):
         project = self.get_object()
         new_status = request.data.get('status')
@@ -83,23 +100,35 @@ class ProjectViewSet(viewsets.ModelViewSet):
             'allowed_transitions': VALID_TRANSITIONS.get(new_status, [])
         })
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        queryset = self.get_queryset()  # respects role filtering automatically
+        
+        return Response({
+            'total': queryset.count(),
+            'planning': queryset.filter(status='planning').count(),
+            'in_progress': queryset.filter(status='in_progress').count(),
+            'on_hold': queryset.filter(status='on_hold').count(),
+            'completed': queryset.filter(status='completed').count(),
+            'cancelled': queryset.filter(status='cancelled').count(),
+        })
+
 class ProjectAssignmentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrStaff]
     serializer_class = ProjectAssignmentSerializer
     # queryset = ProjectAssignment.objects.all()
     
-    def get_queryset(self):
+    def get_project(self):
         project_code = self.kwargs.get('project_code')
-        project = get_object_or_404(Project, code=project_code)
+        return get_object_or_404(Project, code=project_code)
+    
+    def get_queryset(self):
+        project = self.get_project()
         
         return ProjectAssignment.objects.filter(project=project)
     
     def perform_create(self, serializer):
-        project_code = self.kwargs.get('project_code')
-        project = Project.objects.filter(code=project_code).first()
-        
-        if not project:
-            raise PermissionDenied("Project not found.")
+        project = self.get_project()
         
         TimelineEvent.objects.create(
             project=project,
@@ -114,9 +143,12 @@ class TimelineEventViewSet(viewsets.ModelViewSet):
     serializer_class = TimelineEventSerializer
     permission_classes = [IsAdminOrStaff]
     
-    def get_queryset(self):
+    def get_project(self):
         project_code = self.kwargs.get('project_code')
-        project = get_object_or_404(Project, code=project_code)
+        return get_object_or_404(Project, code=project_code)
+    
+    def get_queryset(self):
+        project = self.get_project()
         
         user = self.request.user        
         if user.role == 'client':
@@ -126,26 +158,24 @@ class TimelineEventViewSet(viewsets.ModelViewSet):
         return TimelineEvent.objects.filter(project=project).order_by('created_at')
     
     def perform_create(self, serializer):
-        
-        project_code = self.kwargs.get('project_code')
-        project = get_object_or_404(Project, code=project_code)
+        project = self.get_project()
         
         serializer.save(created_by=self.request.user, project=project)
 
 class BaseProjectTypeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrStaff]
     project_type = None
+    
+    def get_project(self):
+        project_code = self.kwargs.get('project_code')
+        return get_object_or_404(Project, code=project_code)
 
     def get_queryset(self):
-        project_code = self.kwargs.get('project_code')
-        project = get_object_or_404(Project, code=project_code)
-        
+        project = self.get_project()
         return self.queryset.filter(project=project)
         
     def perform_create(self, serializer):
-        
-        project_code = self.kwargs.get('project_code')
-        project = get_object_or_404(Project, code=project_code)
+        project = self.get_project()
 
         if project.type is not None:
             raise ValidationError(f'Project already has a {project.type} record.')

@@ -5,7 +5,7 @@ from django.db import models
 from django.db import models
 from commmon.models import UUIDTimeStampedModel
 from accounts.models import User
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 class ProjectStatus(models.TextChoices):
     PLANNING = "planning", "Planning"
@@ -47,6 +47,8 @@ class Project(UUIDTimeStampedModel):
     def save(self, *args, **kwargs):
         if not self.code:  
             self.code = self.generate_code()
+        if not self.due_date:
+            self.due_date = date.today() + timedelta(weeks=2)
         super().save(*args, **kwargs)
 
 
@@ -61,6 +63,7 @@ class ProjectAssignment(UUIDTimeStampedModel):
     assignment_role = models.CharField(max_length=120, blank=True)
 
     class Meta:
+        ordering = ['-created_at']
         constraints = [
             models.UniqueConstraint(
                 fields=["project", "assignee"], name="uniq_project_assignee"
