@@ -13,13 +13,19 @@ class ProjectStatus(models.TextChoices):
     ON_HOLD = "on_hold", "On Hold"
     COMPLETED = "completed", "Completed"
     CANCELLED = "cancelled", "Cancelled"
+    
+class ProjectTypes(models.TextChoices):
+    PRESSURE_TEST = "Pressure_test", "Pressure Test"
+    LEAK_TEST = "Leak_test", "Leak Test"
+    CALIBRATION = "Calibration", "Calibration"
+
 
 
 class Project(UUIDTimeStampedModel):    
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="projects")
     name = models.CharField(max_length=50)
     company = models.CharField(max_length=50) #This should be organisation not company name, we can fetch company name from organisation model using this field
-    type = models.CharField(max_length=50, null=True)  # Should be set to read only on serializer side as it will be set by views e.g Pressure Test, Leak Test, Calibration etc. To migrate later
+    type = models.CharField(max_length=20, null=True, choices=ProjectTypes.choices)
     code = models.CharField(max_length=30, unique=True)
     location = models.CharField(max_length=255, blank=True)
     status = models.CharField(

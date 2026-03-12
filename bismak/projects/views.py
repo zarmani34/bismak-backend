@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
 from accounts.models import User
-from .models import PressureTest, Project, ProjectAssignment, TimelineEvent, ProjectStatus
+from .models import PressureTest, Project, ProjectAssignment, ProjectTypes, TimelineEvent, ProjectStatus
 from .serializers import ProjectAssignmentSerializer, TimelineEventSerializer, ProjectDetailSerializer, ProjectListSerializer, PressureTestSerializer, LeakTestSerializer
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from commmon.permissions import IsAdminOrStaff, IsAdmin
@@ -164,7 +164,6 @@ class TimelineEventViewSet(viewsets.ModelViewSet):
 
 class BaseProjectTypeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrStaff]
-    project_type = None
     
     def get_project(self):
         project_code = self.kwargs.get('project_code')
@@ -177,36 +176,30 @@ class BaseProjectTypeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         project = self.get_project()
 
-        if project.type is not None:
-            raise ValidationError(f'Project already has a {project.type} record.')
+        if project.type != self.project_type:
+            raise ValidationError(
+                f'This project is a {project.type} project not {self.project_type}.'
+            )
 
-        project.type = self.project_type
-        project.status = 'in_progress'
-        project.save()
-        
         TimelineEvent.objects.create(
             project=project,
             title="Project Executed",
-            description=f"Project executed as: {self.project_type}, by {self.request.user.get_full_name()}",
+            description=f"Project executed as {project.type} by {self.request.user.get_full_name()}",
             created_by=self.request.user
         )
         
         serializer.save(project=project)
         
-    def perform_destroy(self, instance):
-        project = instance.project
-        instance.delete()
-        project.type = None
-        project.save()
+    
    
 class PressureTestViewSet(BaseProjectTypeViewSet):
-    project_type = 'pressure_test'
+    project_type = ProjectTypes.PRESSURE_TEST
     serializer_class = PressureTestSerializer
     queryset = PressureTest.objects.all()
 
 
 class LeakTestViewSet(BaseProjectTypeViewSet):
-    project_type = 'leak_test'
+    project_type = ProjectTypes.LEAK_TEST
     serializer_class = LeakTestSerializer
     queryset = PressureTest.objects.all()
         

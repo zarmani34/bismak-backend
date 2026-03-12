@@ -28,7 +28,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             'code', 'name', 'company', 'location', 'details_url', 'type',
             'status', 'status_display', 'due_date', 'owner', 'created_at'
         ]
-        read_only_fields = ['code', 'owner', 'status', 'created_at', 'type', 'due_date']  # code is auto-generated, owner is set in the view, status is read-only for non-admins
+        read_only_fields = ['code', 'owner', 'status', 'created_at', 'due_date']  # code is auto-generated, owner is set in the view, status is read-only for non-admins
 
     def get_owner(self, obj):
         return obj.owner.get_full_name() if obj.owner else None
@@ -149,4 +149,4 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'leak_test',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'code', 'owner', 'status', 'created_at', 'updated_at', 'type', 'due_date']
+        read_only_fields = ['id', 'code', 'owner', 'status', 'created_at', 'updated_at', 'due_date']
