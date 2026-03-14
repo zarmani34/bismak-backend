@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 # Create your views here.
 from dj_rest_auth.registration.views import RegisterView
@@ -31,10 +31,10 @@ class UserViewSet(viewsets.ModelViewSet):
             return User.objects.filter(id=self.request.user.id) # for now use id and change to user_id later
         return User.objects.all()
     
-    @action(detail=False, methods=['get'], url_path='assignable')
-    def assignable_users(self, request):
-        users = User.objects.filter(role__in=['staff', 'admin'])
-        serializer = UserSerializer(users, many=True)
+    @action(detail=False, methods=['get'], url_path='staffs')
+    def staff_list(self, request):
+        staffs = User.objects.filter(role='staff')
+        serializer = UserSerializer(staffs, many=True)
         return Response(serializer.data)
             
 

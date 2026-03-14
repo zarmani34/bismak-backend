@@ -19,8 +19,6 @@ class ProjectTypes(models.TextChoices):
     LEAK_TEST = "Leak_test", "Leak Test"
     CALIBRATION = "Calibration", "Calibration"
 
-
-
 class Project(UUIDTimeStampedModel):    
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="projects")
     name = models.CharField(max_length=50)

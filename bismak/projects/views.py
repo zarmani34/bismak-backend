@@ -112,6 +112,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
             'completed': queryset.filter(status='completed').count(),
             'cancelled': queryset.filter(status='cancelled').count(),
         })
+        
+    # def admin_user
 
 class ProjectAssignmentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrStaff]
@@ -129,6 +131,8 @@ class ProjectAssignmentViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         project = self.get_project()
+               
+        serializer.save(project=project, assigned_by=self.request.user)
         
         TimelineEvent.objects.create(
             project=project,
@@ -136,8 +140,6 @@ class ProjectAssignmentViewSet(viewsets.ModelViewSet):
             description=f"Project assigned to {serializer.validated_data['assignee'].get_full_name()}, role is: {serializer.validated_data.get('assignment_role', 'N/A')}",
             created_by=self.request.user
         )
-        
-        serializer.save(project=project, assigned_by=self.request.user)
 
 class TimelineEventViewSet(viewsets.ModelViewSet):
     serializer_class = TimelineEventSerializer
