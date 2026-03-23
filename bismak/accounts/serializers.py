@@ -1,5 +1,6 @@
 # serializers.py
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import AccessToken
 from dj_rest_auth.serializers import LoginSerializer as DefaultLoginSerializer, UserDetailsSerializer
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import JWTSerializer
@@ -7,6 +8,13 @@ from allauth.account.models import EmailAddress
 
 from accounts.models import Organisation, User
 
+class CustomAccessToken(AccessToken):
+    @classmethod
+    def for_user(cls, user):
+        token = super().for_user(user)
+        token['role'] = user.role
+        return token
+    
 class CustomLoginSerializer(DefaultLoginSerializer):
     username = None
 
@@ -137,7 +145,7 @@ class ClientRegisterSerializer(RegisterSerializer):
     
     
 
-class CustomJWTSerializer(JWTSerializer):
+class CustomJWTSerializer(JWTSerializer):    
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # remove tokens from response body

@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
 from accounts.models import User
-from .models import PressureTest, Project, ProjectAssignment, ProjectTypes, TimelineEvent, ProjectStatus
+from .models import PressureTest, Project, ProjectAssignment, ProjectTypes, TimelineEvent, ProjectStatus, LeakTest
 from .serializers import ProjectAssignmentSerializer, TimelineEventSerializer, ProjectDetailSerializer, ProjectListSerializer, PressureTestSerializer, LeakTestSerializer
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from commmon.permissions import IsAdminOrStaff, IsAdmin
@@ -23,9 +23,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
-        if user.role in ('staff', 'admin'):
+        if user.role == 'admin':
             return Project.objects.all()
-        return Project.objects.filter(owner=user)  # clients only see their own projects
+        elif user.role == 'staff':
+            return Project.objects.filter(assignments__assignee=user)
+        return Project.objects.filter(owner=user)  # client  # clients only see their own projects
     
     
     def perform_create(self, serializer):
@@ -131,16 +133,31 @@ class ProjectAssignmentViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         project = self.get_project()
+        if project.status == ProjectStatus.PLANNING:
+            project.status = ProjectStatus.IN_PROGRESS
+            project.save()
                
         serializer.save(project=project, assigned_by=self.request.user)
         
         TimelineEvent.objects.create(
             project=project,
-            title="Project Assigned",
+            title="Project Assigned and status updated",
             description=f"Project assigned to {serializer.validated_data['assignee'].get_full_name()}, role is: {serializer.validated_data.get('assignment_role', 'N/A')}",
             created_by=self.request.user
         )
-
+        
+    def perform_destroy(self, instance):
+        project = instance.project
+        assignee_name = instance.assignee.get_full_name()
+        
+        instance.delete()
+        
+        TimelineEvent.objects.create(
+            project=project,
+            title="Project Unassigned",
+            description=f"Project unassigned from {assignee_name}, role was: {instance.assignment_role}",
+            created_by=self.request.user
+        )
 class TimelineEventViewSet(viewsets.ModelViewSet):
     serializer_class = TimelineEventSerializer
     permission_classes = [IsAdminOrStaff]
@@ -169,10 +186,12 @@ class BaseProjectTypeViewSet(viewsets.ModelViewSet):
     
     def get_project(self):
         project_code = self.kwargs.get('project_code')
+        print(project_code)
         return get_object_or_404(Project, code=project_code)
 
     def get_queryset(self):
         project = self.get_project()
+        print(self.queryset.filter(project=project))
         return self.queryset.filter(project=project)
         
     def perform_create(self, serializer):
@@ -181,6 +200,11 @@ class BaseProjectTypeViewSet(viewsets.ModelViewSet):
         if project.type != self.project_type:
             raise ValidationError(
                 f'This project is a {project.type} project not {self.project_type}.'
+            )
+            
+        if self.queryset.filter(project=project).exists():
+            raise ValidationError(
+                f'This project already has a {self.project_type} record.'
             )
 
         TimelineEvent.objects.create(
@@ -203,7 +227,7 @@ class PressureTestViewSet(BaseProjectTypeViewSet):
 class LeakTestViewSet(BaseProjectTypeViewSet):
     project_type = ProjectTypes.LEAK_TEST
     serializer_class = LeakTestSerializer
-    queryset = PressureTest.objects.all()
+    queryset = LeakTest.objects.all()
         
 # Project will be in two views 
 # for users like staff to request project and for admin or staff to update

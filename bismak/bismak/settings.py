@@ -189,7 +189,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Set to 'mandatory' in production
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://192.168.43.215:3000", "http://172.20.10.4:3000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://192.168.43.215:3000", "http://172.20.10.4:3000", 'http://192.168.0.181:3000']
 CORS_ALLOW_CREDENTIALS = True
 
 # settings.py
@@ -197,5 +197,6 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "192.168.43.215",
-    '172.20.10.4'
-]
+    '172.20.10.4',
+    '192.168.0.181',
+]  

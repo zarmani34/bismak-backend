@@ -91,6 +91,10 @@ class TimelineEvent(UUIDTimeStampedModel):
         return f"{self.project.code} | {self.title}"
     
 class PressureTest(UUIDTimeStampedModel):
+    
+    class Meta:
+        ordering = ['-created_at']
+        
     project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='pressure_test')
     
     # Client & Location
@@ -137,7 +141,12 @@ class PressureTest(UUIDTimeStampedModel):
             self.next_test_date = self.date_of_test.replace(year=self.date_of_test.year + 2)
         super().save(*args, **kwargs)
 
+    
 class LeakTest(UUIDTimeStampedModel):
+    
+    class Meta:
+        ordering = ['-created_at'] 
+        
     project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='leak_test')
     
     # Client & Location
@@ -145,36 +154,32 @@ class LeakTest(UUIDTimeStampedModel):
     location = models.CharField(max_length=255)
     
     # Test Details
-    date_of_test = models.DateField()
-    expiring_date = models.DateField()
-    equipment_tested = models.CharField(max_length=255)  # e.g Underground Fuel Storage Tanks
-    
-    # Result
-    RESULT_CHOICES = [
-        ('satisfactory', 'Satisfactory'),
-        ('unsatisfactory', 'Unsatisfactory'),
-    ]
-    result = models.CharField(max_length=20, choices=RESULT_CHOICES)
-
-    def __str__(self):
-        return f"Leak Test — {self.project.code}"
-
-
-class LeakTestTank(UUIDTimeStampedModel):
-    """Each row in the leak test table"""
-    leak_test = models.ForeignKey(LeakTest, on_delete=models.CASCADE, related_name='tanks')
-    tank_no = models.PositiveIntegerField()
-    product_stored = models.CharField(max_length=100)  # e.g PMS, AGO, DPK
-    capacity = models.PositiveIntegerField()  # in litres
     age_of_tank = models.PositiveIntegerField()  # in years
     date_of_test = models.DateField()
+    expiring_date = models.DateField()
     
     REMARK_CHOICES = [
-        ('good', 'Good'),
+        ('good', 'Good'),        
         ('bad', 'Bad'),
         ('fair', 'Fair'),
     ]
     remark = models.CharField(max_length=20, choices=REMARK_CHOICES)
+
+    def __str__(self):
+        return f"Leak Test — {self.project.code}"
+
+class LeakTestTankProducts(models.TextChoices):
+    AGO = 'ago', 'AGO'
+    PMS = 'pms', 'PMS'
+    DPK = 'dpk', 'DPK'
+    
+class LeakTestTank(UUIDTimeStampedModel):
+    """Each row in the leak test table"""
+    leak_test = models.ForeignKey(LeakTest, on_delete=models.CASCADE, related_name='tanks')
+    tank_no = models.PositiveIntegerField()
+    product_stored = models.CharField(max_length=10, choices=LeakTestTankProducts.choices)  # e.g PMS, AGO, DPK
+    capacity = models.PositiveIntegerField()  # in litres
+    
 
     class Meta:
         ordering = ['tank_no']

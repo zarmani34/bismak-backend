@@ -21,14 +21,15 @@ class ProjectListSerializer(serializers.ModelSerializer):
     owner = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     details_url = serializers.HyperlinkedIdentityField(view_name='project-detail', lookup_field='code')
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
 
     class Meta:
         model = Project
         fields = [
             'code', 'name', 'company', 'location', 'details_url', 'type',
-            'status', 'status_display', 'due_date', 'owner', 'created_at'
+            'status', 'status_display', 'due_date', 'owner', 'created_at', 'type_display'
         ]
-        read_only_fields = ['code', 'owner', 'status', 'created_at', 'due_date']  # code is auto-generated, owner is set in the view, status is read-only for non-admins
+        read_only_fields = ['code', 'owner', 'status', 'created_at', 'due_date' ]  # code is auto-generated, owner is set in the view, status is read-only for non-admins
 
     def get_owner(self, obj):
         return obj.owner.get_full_name() if obj.owner else None
@@ -89,7 +90,7 @@ class LeakTestTankSerializer(serializers.ModelSerializer):
         model = LeakTestTank
         fields = [
             'id', 'tank_no', 'product_stored', 
-            'capacity', 'age_of_tank', 'date_of_test', 'remark'
+            'capacity', 'age_of_tank'
         ]
         read_only_fields = ['id']
 
@@ -103,9 +104,9 @@ class LeakTestSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'project', 'station_name', 'location',
             'date_of_test', 'expiring_date', 'equipment_tested',
-            'result', 'result_display', 'tanks', 'created_at'
+            'remark', 'remark_display', 'tanks', 'created_at', 'age_of_tank'
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'created_at', 'project']
 
     def create(self, validated_data):
         tanks_data = validated_data.pop('tanks')
@@ -138,6 +139,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     pressure_test = PressureTestSerializer(read_only=True)
     leak_test = LeakTestSerializer(read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
 
     class Meta:
         model = Project
@@ -147,6 +149,6 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'due_date', 'description', 'owner',
             'assignments', 'events', 'pressure_test',
             'leak_test',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at', 'type_display'
         ]
         read_only_fields = ['id', 'code', 'owner', 'status', 'created_at', 'updated_at', 'due_date']
