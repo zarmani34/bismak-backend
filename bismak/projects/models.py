@@ -154,7 +154,7 @@ class LeakTest(UUIDTimeStampedModel):
     location = models.CharField(max_length=255)
     
     # Test Details
-    age_of_tank = models.PositiveIntegerField()  # in years
+    age_of_tank = models.PositiveIntegerField(default=0)  # in years
     date_of_test = models.DateField()
     expiring_date = models.DateField()
     
@@ -163,10 +163,12 @@ class LeakTest(UUIDTimeStampedModel):
         ('bad', 'Bad'),
         ('fair', 'Fair'),
     ]
-    remark = models.CharField(max_length=20, choices=REMARK_CHOICES)
+    remark = models.CharField(max_length=20, choices=REMARK_CHOICES, default='good')
 
     def __str__(self):
         return f"Leak Test — {self.project.code}"
+# Client represntative and dpr in cahrge field to be added later 
+# Executed by
 
 class LeakTestTankProducts(models.TextChoices):
     AGO = 'ago', 'AGO'
@@ -189,3 +191,4 @@ class LeakTestTank(UUIDTimeStampedModel):
 # 
 # create pressuretest model, calibration model, leaktest model etc 
 # then link them with project type ND THEN PROJECT TYPE TO project using one-to-one relationship 
+# O project type create status should bbe changed to complete and

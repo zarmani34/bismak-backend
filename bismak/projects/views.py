@@ -186,12 +186,10 @@ class BaseProjectTypeViewSet(viewsets.ModelViewSet):
     
     def get_project(self):
         project_code = self.kwargs.get('project_code')
-        print(project_code)
         return get_object_or_404(Project, code=project_code)
 
     def get_queryset(self):
         project = self.get_project()
-        print(self.queryset.filter(project=project))
         return self.queryset.filter(project=project)
         
     def perform_create(self, serializer):

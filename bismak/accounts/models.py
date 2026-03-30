@@ -63,7 +63,7 @@ class User(AbstractUser):
     objects = UserManager()
 
     def __str__(self):
-        return f"{self.get_full_name()} ({self.email} - {self.user_id})"
+        return f"{self.get_full_name()} - {self.user_id}"
     
     def generate_user_id(self):
         if self.role == 'admin':

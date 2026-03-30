@@ -90,21 +90,21 @@ class LeakTestTankSerializer(serializers.ModelSerializer):
         model = LeakTestTank
         fields = [
             'id', 'tank_no', 'product_stored', 
-            'capacity', 'age_of_tank'
+            'capacity'
         ]
         read_only_fields = ['id']
 
 
 class LeakTestSerializer(serializers.ModelSerializer):
     tanks = LeakTestTankSerializer(many=True)
-    result_display = serializers.CharField(source='get_result_display', read_only=True)
+    remark_display = serializers.CharField(source='get_remark_display', read_only=True)
 
     class Meta:
         model = LeakTest
         fields = [
             'id', 'project', 'station_name', 'location',
-            'date_of_test', 'expiring_date', 'equipment_tested',
-            'remark', 'remark_display', 'tanks', 'created_at', 'age_of_tank'
+            'date_of_test', 'expiring_date',  'age_of_tank',
+            'remark', 'remark_display', 'tanks', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'project']
 
