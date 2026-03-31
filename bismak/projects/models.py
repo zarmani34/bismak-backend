@@ -22,7 +22,7 @@ class ProjectTypes(models.TextChoices):
 class Project(UUIDTimeStampedModel):    
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="projects")
     name = models.CharField(max_length=50)
-    company = models.CharField(max_length=50) #This should be organisation not company name, we can fetch company name from organisation model using this field
+    company = models.CharField(max_length=50)
     type = models.CharField(max_length=20, null=True, choices=ProjectTypes.choices)
     code = models.CharField(max_length=30, unique=True)
     location = models.CharField(max_length=255, blank=True)
