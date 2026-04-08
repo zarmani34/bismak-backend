@@ -25,7 +25,7 @@ class ServiceType(UUIDTimeStampedModel):
 class ServiceRequest(UUIDTimeStampedModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_requests')    
     name = models.CharField(max_length=50)
-    service_type = models.ForeignKey(ServiceType, on_delete=models.PROTECT, related_name='requests')
+    service_type = models.ForeignKey(ServiceType, on_delete=models.PROTECT, null=True, blank=True, related_name='requests')
     custom_service = models.CharField(max_length=255, blank=True)  # for one-off services
     location = models.CharField(max_length=255)
     description = models.TextField()
@@ -35,4 +35,4 @@ class ServiceRequest(UUIDTimeStampedModel):
         return self.service_type.name if self.service_type else self.custom_service
 
     def __str__(self):
-        return f"{self.client.get_full_name()} — {self.service_type.name}"
+        return f"{self.owner.get_full_name()} — {self.service_type.name}"

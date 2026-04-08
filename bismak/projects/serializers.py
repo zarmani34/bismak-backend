@@ -68,7 +68,7 @@ class PressureTestSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'project',
             # Client & Location
-            'client', 'location_address',
+            'client', 'location_address', 'client_representative', 'dpr_in_charge',
             # Equipment Details
             'manufacturer', 'manufacturing_date', 'serial_no', 'truck_no',
             'tank_capacity', 'product_stored', 'tank_type',
@@ -94,7 +94,6 @@ class LeakTestTankSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id']
 
-
 class LeakTestSerializer(serializers.ModelSerializer):
     tanks = LeakTestTankSerializer(many=True)
     remark_display = serializers.CharField(source='get_remark_display', read_only=True)
@@ -104,7 +103,8 @@ class LeakTestSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'project', 'station_name', 'location',
             'date_of_test', 'expiring_date',  'age_of_tank',
-            'remark', 'remark_display', 'tanks', 'created_at'
+            'remark', 'remark_display', 'tanks', 'created_at',
+            'client_representative', 'executed_by', 'dpr_in_charge'
         ]
         read_only_fields = ['id', 'created_at', 'project']
 
@@ -130,7 +130,6 @@ class LeakTestSerializer(serializers.ModelSerializer):
                 LeakTestTank.objects.create(leak_test=instance, **tank_data)
 
         return instance
-
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)

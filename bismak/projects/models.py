@@ -31,6 +31,7 @@ class Project(UUIDTimeStampedModel):
     )
     due_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True)
+    executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="executed_projects", limit_choices_to={"role__in": ["staff", "admin"]})
 
     class Meta:
         ordering = ["-created_at"]
@@ -100,6 +101,8 @@ class PressureTest(UUIDTimeStampedModel):
     # Client & Location
     client = models.CharField(max_length=255)
     location_address = models.CharField(max_length=255)
+    client_representative = models.CharField(max_length=255)
+    dpr_in_charge = models.CharField(max_length=255)
     
     # Equipment Details
     manufacturer = models.CharField(max_length=255)
@@ -152,6 +155,8 @@ class LeakTest(UUIDTimeStampedModel):
     # Client & Location
     station_name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
+    client_representative = models.CharField(max_length=255)
+    dpr_in_charge = models.CharField(max_length=255)
     
     # Test Details
     age_of_tank = models.PositiveIntegerField(default=0)  # in years
@@ -167,8 +172,7 @@ class LeakTest(UUIDTimeStampedModel):
 
     def __str__(self):
         return f"Leak Test — {self.project.code}"
-# Client represntative and dpr in cahrge field to be added later 
-# Executed by
+#
 
 class LeakTestTankProducts(models.TextChoices):
     AGO = 'ago', 'AGO'

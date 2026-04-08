@@ -1,6 +1,6 @@
 from django.db import models
 from commmon.models import UUIDTimeStampedModel
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 from datetime import datetime, date, timedelta
 # Create your models here.
 
@@ -71,7 +71,7 @@ class Quote(UUIDTimeStampedModel):
         day = now.strftime("%d")   
         time = now.strftime("%H%M%S")
         
-        return f"BE-PR-{year}-{month}-{day}-{time}"
+        return f"BE-QT-{year}-{month}-{day}-{time}"
 
     def save(self, *args, **kwargs):
         if not self.code:  
