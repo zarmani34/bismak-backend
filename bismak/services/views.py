@@ -1,10 +1,11 @@
-# apps/services/views.py
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
+
+from accounts.models import User
 from .models import ServiceType, ServiceRequest
 from .serializers import (
     ServiceTypeSerializer,
@@ -32,6 +33,7 @@ class ServiceTypeViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         # only admin can create, update, delete service types
+        print(f"Action: {self.action}, User: {self.request.user}, Role: {self.request.user.role}")
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdmin()]
         return [IsAuthenticated()]
@@ -39,13 +41,12 @@ class ServiceTypeViewSet(viewsets.ModelViewSet):
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
+    lookup_field = 'code'  # Use code instead of id for lookups
 
     def get_queryset(self):
         user = self.request.user
         if user.role == 'admin':
             return ServiceRequest.objects.all()
-        elif user.role == 'staff':
-            return ServiceRequest.objects.filter(status='in_progress')
         return ServiceRequest.objects.filter(owner=user)
 
     def get_serializer_class(self):
@@ -54,9 +55,17 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         return ServiceRequestDetailSerializer
 
     def perform_create(self, serializer):
-        if self.request.user.role != 'client':
-            raise PermissionDenied('Only clients can raise service requests.')
-        serializer.save(owner=self.request.user)
+        user = self.request.user
+        if user.role == 'client':
+            serializer.save(owner=user)  # owner is themselves
+        
+        elif user.role in ('admin'):
+            owner_id = self.request.data.get('owner')  # admin provides owner
+            if not owner_id:
+                raise ValidationError({'owner': 'Owner is required when creating service request as admin.'})
+            
+            owner = get_object_or_404(User, user_id=owner_id, role='client')  # must be a client
+            serializer.save(owner=owner)
 
     @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdminOrStaff])
     def update_status(self, request, pk=None):

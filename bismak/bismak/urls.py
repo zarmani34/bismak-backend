@@ -24,4 +24,6 @@ urlpatterns = [
     path('api/auth/', include('dj_rest_auth.urls')),  # covers everything login, logout, reset, reset/confirm, user
     path('api/', include('accounts.urls')),
     path('api/', include('projects.urls')),
+    path('api/', include('billings.urls')),
+    path('api/', include('services.urls')),
 ]

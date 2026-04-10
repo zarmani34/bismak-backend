@@ -36,7 +36,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         if user.role == 'client':
             serializer.save(owner=user)  # owner is themselves
             
-        elif user.role in ('admin', 'staff'):
+        elif user.role in ('admin'):
             owner_id = self.request.data.get('owner')  # admin provides owner
             if not owner_id:
                 raise ValidationError({'owner': 'Owner is required when creating project as admin.'})
@@ -128,7 +128,6 @@ class ProjectAssignmentViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         project = self.get_project()
-        
         return ProjectAssignment.objects.filter(project=project)
     
     def perform_create(self, serializer):

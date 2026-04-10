@@ -1,5 +1,6 @@
-# apps/services/serializers.py
 from rest_framework import serializers
+
+from accounts.serializers import UserSerializer
 from .models import ServiceType, ServiceRequest
 
 
@@ -37,7 +38,7 @@ class ServiceRequestDetailSerializer(serializers.ModelSerializer):
         allow_null=True
     )
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    owner = serializers.SerializerMethodField()
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = ServiceRequest
@@ -51,12 +52,7 @@ class ServiceRequestDetailSerializer(serializers.ModelSerializer):
 
     def get_service_name(self, obj):
         return obj.get_service_name()
-
-    def get_owner(self, obj):
-        return {
-            'user_id': obj.owner.user_id,
-            'name': obj.owner.get_full_name(),
-        }
+    
 
     def validate(self, data):
         if not data.get('service_type') and not data.get('custom_service'):

@@ -3,6 +3,7 @@ from commmon.models import UUIDTimeStampedModel
 from rest_framework.exceptions import ValidationError
 from accounts.models import User
 from projects.models import Project
+from datetime import datetime, date, timedelta
 
 # Create your models here.
 class ServiceRequestChoice(models.TextChoices):
@@ -24,7 +25,8 @@ class ServiceType(UUIDTimeStampedModel):
 
 class ServiceRequest(UUIDTimeStampedModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_requests')    
-    name = models.CharField(max_length=50)
+    company_name = models.CharField(max_length=50)
+    code = models.CharField(max_length=30, unique=True)
     service_type = models.ForeignKey(ServiceType, on_delete=models.PROTECT, null=True, blank=True, related_name='requests')
     custom_service = models.CharField(max_length=255, blank=True)  # for one-off services
     location = models.CharField(max_length=255)
@@ -35,4 +37,14 @@ class ServiceRequest(UUIDTimeStampedModel):
         return self.service_type.name if self.service_type else self.custom_service
 
     def __str__(self):
-        return f"{self.owner.get_full_name()} — {self.service_type.name}"
+        return f"{self.owner.get_full_name()} — {self.service_type.name if self.service_type else self.custom_service} at {self.location}"
+    
+    def generate_code(self):
+        now = datetime.now()
+        
+        year = now.strftime("%y")
+        month = now.strftime("%m")
+        day = now.strftime("%d")   
+        time = now.strftime("%H%M%S")
+        
+        return f"BE-SR-{year}-{month}-{day}-{time}"
