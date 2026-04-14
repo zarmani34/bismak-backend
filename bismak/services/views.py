@@ -91,3 +91,18 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             'new_status': new_status,
             'allowed_transitions': VALID_TRANSITIONS.get(new_status, [])
         })
+        
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        queryset = self.get_queryset()  # respects role filtering automatically
+        
+        return Response({
+            'total': queryset.count(),
+            'pending': queryset.filter(status='pending').count(),
+            'in_progress': queryset.filter(status='in_progress').count(),
+            'reviewed': queryset.filter(status='reviewed').count(),
+            'quoted': queryset.filter(status='quoted').count(),
+            'accepted': queryset.filter(status='accepted').count(),
+            'rejected': queryset.filter(status='rejected').count(),
+            'completed': queryset.filter(status='completed').count(),
+        })
