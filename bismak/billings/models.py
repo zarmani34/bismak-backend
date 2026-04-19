@@ -19,6 +19,7 @@ class InvoiceStatus(models.TextChoices):
     OVERDUE = "overdue", "Overdue"
     CANCELLED = "cancelled", "Cancelled"
     
+    
 class Quote(UUIDTimeStampedModel):
     STATUS_CHOICES = [
         ('draft', 'Draft'),
@@ -37,13 +38,13 @@ class Quote(UUIDTimeStampedModel):
         'projects.Project', on_delete=models.CASCADE,
         null=True, blank=True, related_name='quotes'
     )
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     note = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=QuoteStatus.choices, default='draft')
     quoted_by = models.ForeignKey(
         'accounts.User', on_delete=models.SET_NULL, null=True, related_name='quotes_given'
     )
-    code = models.CharField(max_length=30, unique=True)  # e.g. BE-PR-YYMMDD-HHMMSS
+    code = models.CharField(max_length=30, unique=True)  
     valid_until = models.DateField(null=True, blank=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
     rejected_at = models.DateTimeField(null=True, blank=True)
@@ -72,6 +73,11 @@ class Quote(UUIDTimeStampedModel):
         time = now.strftime("%H%M%S")
         
         return f"BE-QT-{year}-{month}-{day}-{time}"
+    
+    def compute_total(self):
+        total = self.items.aggregate(total=sum('total'))['total'] or 0
+        self.amount = total
+        self.save()
 
     def save(self, *args, **kwargs):
         if not self.code:  
@@ -79,6 +85,26 @@ class Quote(UUIDTimeStampedModel):
         if not self.valid_until:
             self.valid_until = date.today() + timedelta(weeks=2)
         super().save(*args, **kwargs)
+        
+        
+class QuoteItem(UUIDTimeStampedModel):
+    quote = models.ForeignKey(
+        Quote, on_delete=models.CASCADE, related_name='items'
+    )
+    description = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+
+    def save(self, *args, **kwargs):
+        self.total = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.description} — {self.total}"
+    
+    class Meta:
+        ordering = ['-created_at']
         
 class Invoice(UUIDTimeStampedModel):
 
