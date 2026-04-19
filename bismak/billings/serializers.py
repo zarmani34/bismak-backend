@@ -69,17 +69,21 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
 
         for item_data in items_data:
             QuoteItem.objects.create(quote=quote, **item_data)
-
-        # compute total from items
-        quote.compute_total()
         return quote
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('items', None)
+        user = self.context['request'].user
+        
+        # detect if update is for revised
+        old_amount = instance.amount
+        new_amount = validated_data.get('amount', old_amount)
+        if new_amount != old_amount:
+            note = validated_data.get('note', '')
+            instance.revise(new_amount, note, user)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        instance.save()
 
         if items_data is not None:
             instance.items.all().delete()
@@ -87,6 +91,7 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
                 QuoteItem.objects.create(quote=instance, **item_data)
             instance.compute_total()
 
+        instance.save()
         return instance
 
 
