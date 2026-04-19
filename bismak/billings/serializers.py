@@ -7,7 +7,7 @@ from accounts.serializers import UserSerializer
 
 class InvoiceSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True, source='quote.amount')
     class Meta:
         model = Invoice
         fields = [

@@ -19,7 +19,7 @@ class ServiceRequestListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceRequest
         fields = [
-            'id', 'name', 'service_name', 'location',
+            'id', 'service_name', 'location', 'company_name', 'code',
             'status', 'status_display', 'owner_name', 'created_at'
         ]
 
@@ -43,7 +43,7 @@ class ServiceRequestDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceRequest
         fields = [
-            'id', 'name', 'service_type', 'service_type_id',
+            'id', 'service_type', 'service_type_id', 'company_name',
             'custom_service', 'service_name', 'location',
             'description', 'status', 'status_display',
             'owner', 'created_at', 'updated_at'

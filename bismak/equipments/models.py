@@ -1,5 +1,6 @@
 from django.db import models
 from commmon.models import UUIDTimeStampedModel
+from datetime import datetime, date, timedelta
 
 # Create your models here.
 
@@ -12,6 +13,7 @@ class Equipment(UUIDTimeStampedModel):
     ]
 
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=100, unique=True)  
     category = models.CharField(max_length=255, blank=True)  # just a text field
     serial_number = models.CharField(max_length=100, unique=True)
     model = models.CharField(max_length=255, blank=True)
@@ -22,7 +24,24 @@ class Equipment(UUIDTimeStampedModel):
 
     def __str__(self):
         return f"{self.name} ({self.serial_number})"
-
+    
+    def generate_code(self):
+        now = datetime.now()
+        
+        year = now.strftime("%y")
+        month = now.strftime("%m")
+        day = now.strftime("%d")   
+        time = now.strftime("%H%M%S")
+        
+        return f"BE-EQP-{year}-{month}-{day}-{time}"
+    
+    def save(self, *args, **kwargs):
+        if not self.code:  
+            self.code = self.generate_code()
+        super().save(*args, **kwargs)
+        
+    class Meta:
+        ordering = ['-created_at']
 
 class EquipmentRequest(UUIDTimeStampedModel):
     STATUS_CHOICES = [
@@ -53,6 +72,21 @@ class EquipmentRequest(UUIDTimeStampedModel):
     def __str__(self):
         return f"{self.requested_by} requested {self.equipment.name}"
     
+    def generate_code(self):
+        now = datetime.now()
+        
+        year = now.strftime("%y")
+        month = now.strftime("%m")
+        day = now.strftime("%d")   
+        time = now.strftime("%H%M%S")
+        
+        return f"BE-EQR-{year}-{month}-{day}-{time}"
+    
+    def save(self, *args, **kwargs):
+        if not self.code:  
+            self.code = self.generate_code()
+        super().save(*args, **kwargs)
+    
     class Meta:
         ordering = ['-created_at']
 
@@ -70,7 +104,7 @@ class MaintenanceRequest(UUIDTimeStampedModel):
         ('calibration', 'Calibration'),
         ('repair', 'Repair'),
     ]
-
+    code = models.CharField(max_length=100, unique=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, related_name='maintenance_requests')
     requested_by = models.ForeignKey(
         'accounts.User', on_delete=models.SET_NULL,
@@ -87,3 +121,21 @@ class MaintenanceRequest(UUIDTimeStampedModel):
 
     def __str__(self):
         return f"{self.type} request for {self.equipment.name}"
+    
+    def generate_code(self):
+        now = datetime.now()
+        
+        year = now.strftime("%y")
+        month = now.strftime("%m")
+        day = now.strftime("%d")   
+        time = now.strftime("%H%M%S")
+        
+        return f"BE-MRQ-{year}-{month}-{day}-{time}"
+    
+    def save(self, *args, **kwargs):
+        if not self.code:  
+            self.code = self.generate_code()
+        super().save(*args, **kwargs)
+        
+    class Meta:
+        ordering = ['-created_at']

@@ -22,13 +22,16 @@ class ServiceType(UUIDTimeStampedModel):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        ordering = ['-created_at']
 
 class ServiceRequest(UUIDTimeStampedModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_requests')    
     company_name = models.CharField(max_length=50)
     code = models.CharField(max_length=30, unique=True)
     service_type = models.ForeignKey(ServiceType, on_delete=models.PROTECT, null=True, blank=True, related_name='requests')
-    custom_service = models.CharField(max_length=255, blank=True)  # for one-off services
+    custom_service = models.CharField(max_length=255, blank=True, null=True)  # for one-off services
     location = models.CharField(max_length=255)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=ServiceRequestChoice.choices, default='pending')
@@ -48,3 +51,7 @@ class ServiceRequest(UUIDTimeStampedModel):
         time = now.strftime("%H%M%S")
         
         return f"BE-SR-{year}-{month}-{day}-{time}"
+    
+    class Meta:
+        ordering = ['-created_at']
+    

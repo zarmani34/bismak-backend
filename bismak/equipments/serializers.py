@@ -3,7 +3,6 @@ from .models import Equipment, EquipmentCategory, EquipmentRequest, MaintenanceR
 
 
 class EquipmentListSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(source='category.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:

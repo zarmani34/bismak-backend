@@ -84,7 +84,9 @@ class Invoice(UUIDTimeStampedModel):
 
     quote = models.OneToOneField(
         Quote, on_delete=models.PROTECT, 
-        related_name='invoice'
+        related_name='invoice',
+        null=True,
+        blank=True,
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=InvoiceStatus.choices, default='draft')

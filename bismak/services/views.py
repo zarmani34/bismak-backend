@@ -28,15 +28,11 @@ VALID_TRANSITIONS = {
 
 class ServiceTypeViewSet(viewsets.ModelViewSet):
     serializer_class = ServiceTypeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdmin]
     queryset = ServiceType.objects.filter(is_active=True)
+    pagination_class = None # disable pagination 
 
-    def get_permissions(self):
-        # only admin can create, update, delete service types
-        print(f"Action: {self.action}, User: {self.request.user}, Role: {self.request.user.role}")
-        if self.action in ('create', 'update', 'partial_update', 'destroy'):
-            return [IsAdmin()]
-        return [IsAuthenticated()]
+
 
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
@@ -67,9 +63,10 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             owner = get_object_or_404(User, user_id=owner_id, role='client')  # must be a client
             serializer.save(owner=owner)
 
-    @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdminOrStaff])
-    def update_status(self, request, pk=None):
+    @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdmin])
+    def update_status(self, request, code=None):
         service_request = self.get_object()
+        print(service_request)
         new_status = request.data.get('status')
 
         if not new_status:
@@ -99,7 +96,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         return Response({
             'total': queryset.count(),
             'pending': queryset.filter(status='pending').count(),
-            'in_progress': queryset.filter(status='in_progress').count(),
+            'inProgress': queryset.filter(status='in_progress').count(),
             'reviewed': queryset.filter(status='reviewed').count(),
             'quoted': queryset.filter(status='quoted').count(),
             'accepted': queryset.filter(status='accepted').count(),
