@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -45,12 +45,16 @@ INSTALLED_APPS = [
     'projects',
     'services',
     'billings',
+    'equipments',
+    'notifications',
 
     # Third party
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
+    'django_eventstream',
+    'django_celery_results',
 
 
     # Allauth
@@ -202,3 +206,33 @@ ALLOWED_HOSTS = [
     '172.20.10.4',
     '192.168.0.181',
 ]  
+
+# SSE channel manager
+# EVENTSTREAM_CHANNEL_MANAGER_CLASS = 'notifications.channel_auth.UserChannelManager'
+
+# Redis
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+EVENTSTREAM_REDIS = {
+    'host': 'localhost',
+    'port': 6379,
+    'db': 0,
+}
+
+# Celery
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.zoho.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')    # TODO: add Zoho email
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')  # TODO: add Zoho password
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@yourdomain.com')
+
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')

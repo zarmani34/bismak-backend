@@ -8,13 +8,14 @@ from accounts.serializers import UserSerializer
 class InvoiceSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True, source='quote.amount')
+    quote = serializers.CharField(source='quote.code', read_only=True)
     class Meta:
         model = Invoice
         fields = [
             'id', 'code', 'amount', 'status', 'status_display',
-            'due_date', 'paid_at', 'note', 'created_at'
+            'due_date', 'paid_at', 'note', 'created_at','quote'
         ]
-        read_only_fields = ['id', 'code', 'created_at']
+        read_only_fields = ['id', 'code', 'created_at','quote']
 
 
 class QuoteListSerializer(serializers.ModelSerializer):
@@ -48,12 +49,12 @@ class QuoteItemSerializer(serializers.ModelSerializer):
 
 class QuoteDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    quoted_by = UserSerializer()
+    quoted_by = UserSerializer(read_only=True)
     invoice = InvoiceSerializer(read_only=True)
     owner = serializers.SerializerMethodField()
     project = serializers.CharField(source="project.code", read_only=True)
     service_request = serializers.CharField(source="service_request.code", read_only=True)
-    items = QuoteItemSerializer(many=True)
+    items = QuoteItemSerializer(many=True, read_only=True)
 
     def get_owner(self, obj):
         if obj.service_request:
@@ -100,9 +101,9 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'code',  'owner', 'amount', 'note', 'status', 'status_display',
             'valid_until', 'accepted_at', 'rejected_at',
-            'quoted_by', 'invoice', 'created_at', 'updated_at', 'service_request', 'project',
+            'quoted_by', 'invoice', 'created_at', 'updated_at', 'service_request', 'project','items',
         ]
         read_only_fields = [
-            'id', 'code', 'quoted_by', 'accepted_at',
+            'id', 'code', 'quoted_by', 'accepted_at','items',
             'rejected_at', 'created_at', 'updated_at', 'service_request', 'project',
         ]

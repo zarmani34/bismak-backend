@@ -1,11 +1,11 @@
 from django.db import models
 
 # Create your models here.
-# apps/projects/models.py
 from django.db import models
 from commmon.models import UUIDTimeStampedModel
 from accounts.models import User
 from datetime import datetime, date, timedelta
+from model_utils import FieldTracker
 
 class ProjectStatus(models.TextChoices):
     PLANNING = "planning", "Planning"
@@ -32,7 +32,7 @@ class Project(UUIDTimeStampedModel):
     due_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True)
     executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="executed_projects", limit_choices_to={"role__in": ["staff", "admin"]})
-
+    FieldTracker = FieldTracker(fields=['status'])
     class Meta:
         ordering = ["-created_at"]
 
@@ -102,7 +102,6 @@ class PressureTest(UUIDTimeStampedModel):
     client = models.CharField(max_length=255)
     location_address = models.CharField(max_length=255)
     client_representative = models.CharField(max_length=255)
-    dpr_in_charge = models.CharField(max_length=255)
     
     # Equipment Details
     manufacturer = models.CharField(max_length=255)

@@ -4,14 +4,15 @@ from rest_framework.exceptions import ValidationError
 from accounts.models import User
 from projects.models import Project
 from datetime import datetime, date, timedelta
+from model_utils import FieldTracker
 
 # Create your models here.
 class ServiceRequestChoice(models.TextChoices):
     PENDING = "pending", "Pending"
-    REVIEWED = "reviewed", "Reviewed"
+    # REVIEWED = "reviewed", "Reviewed"
     QUOTED = "quoted", "Quoted"
-    ACCEPTED = "accepted", "Accepted"
-    REJECTED = "rejected", "Rejected"
+    # ACCEPTED = "accepted", "Accepted"
+    # REJECTED = "rejected", "Rejected"
     IN_PROGRESS = "in_progress", "In Progress"
     COMPLETED = "completed", "Completed"
 
@@ -35,6 +36,7 @@ class ServiceRequest(UUIDTimeStampedModel):
     location = models.CharField(max_length=255)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=ServiceRequestChoice.choices, default='pending')
+    tracker = FieldTracker(fields=['status'])
 
     def get_service_name(self):
         return self.service_type.name if self.service_type else self.custom_service
@@ -52,6 +54,11 @@ class ServiceRequest(UUIDTimeStampedModel):
         
         return f"BE-SR-{year}-{month}-{day}-{time}"
     
+        
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self.generate_code()
+        super().save(*args, **kwargs)
     class Meta:
         ordering = ['-created_at']
     

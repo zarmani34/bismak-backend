@@ -104,7 +104,7 @@ class LeakTestSerializer(serializers.ModelSerializer):
             'id', 'project', 'station_name', 'location',
             'date_of_test', 'expiring_date',  'age_of_tank',
             'remark', 'remark_display', 'tanks', 'created_at',
-            'client_representative', 'executed_by', 'dpr_in_charge'
+            'client_representative'
         ]
         read_only_fields = ['id', 'created_at', 'project']
 

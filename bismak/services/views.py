@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ValidationError
 
 from accounts.models import User
 from .models import ServiceType, ServiceRequest
@@ -16,19 +16,19 @@ from commmon.permissions import IsAdminOrStaff, IsAdmin
 
 
 VALID_TRANSITIONS = {
-    'pending': ['reviewed', 'cancelled'],
-    'reviewed': ['quoted', 'cancelled'],
-    'quoted': ['accepted', 'rejected'],
-    'accepted': ['in_progress'],
+    'pending': ['quoted', 'in_progress', 'cancelled' ],
+    # 'reviewed': ['quoted', 'cancelled'],
+    'quoted': ['in_progress', 'cancelled'],
+    # 'accepted': ['in_progress'],
     'in_progress': ['completed'],
-    'rejected': [],
+    'cancelled': [],
     'completed': [],
 }
 
 
 class ServiceTypeViewSet(viewsets.ModelViewSet):
     serializer_class = ServiceTypeSerializer
-    permission_classes = [IsAdmin]
+    # permission_classes = [IsAdmin]
     queryset = ServiceType.objects.filter(is_active=True)
     pagination_class = None # disable pagination 
 
@@ -38,6 +38,7 @@ class ServiceTypeViewSet(viewsets.ModelViewSet):
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     lookup_field = 'code'  # Use code instead of id for lookups
+    
 
     def get_queryset(self):
         user = self.request.user
@@ -97,9 +98,9 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             'total': queryset.count(),
             'pending': queryset.filter(status='pending').count(),
             'inProgress': queryset.filter(status='in_progress').count(),
-            'reviewed': queryset.filter(status='reviewed').count(),
+            # 'reviewed': queryset.filter(status='reviewed').count(),
             'quoted': queryset.filter(status='quoted').count(),
-            'accepted': queryset.filter(status='accepted').count(),
-            'rejected': queryset.filter(status='rejected').count(),
+            # 'accepted': queryset.filter(status='accepted').count(),
+            # 'rejected': queryset.filter(status='rejected').count(),
             'completed': queryset.filter(status='completed').count(),
         })

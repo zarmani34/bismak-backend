@@ -2,18 +2,19 @@ from django.db import models
 from commmon.models import UUIDTimeStampedModel
 from django.core.exceptions import ValidationError
 from datetime import datetime, date, timedelta
+from model_utils import FieldTracker
 # Create your models here.
 
 
 class QuoteStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
+    # DRAFT = "draft", "Draft"
     SENT = "sent", "Sent"
     ACCEPTED = "accepted", "Accepted"
     REJECTED = "rejected", "Rejected"
     REVISED = "revised", "Revised"
     
 class InvoiceStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
+    # DRAFT = "draft", "Draft"
     SENT = "sent", "Sent"
     PAID = "paid", "Paid"
     OVERDUE = "overdue", "Overdue"
@@ -21,13 +22,6 @@ class InvoiceStatus(models.TextChoices):
     
     
 class Quote(UUIDTimeStampedModel):
-    STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('sent', 'Sent'),
-        ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
-        ('revised', 'Revised'),
-    ]
 
     # linked to either service request or project — not both
     service_request = models.OneToOneField(
@@ -39,8 +33,8 @@ class Quote(UUIDTimeStampedModel):
         null=True, blank=True, related_name='quotes'
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    note = models.TextField(blank=True)
-    status = models.CharField(max_length=20, choices=QuoteStatus.choices, default='draft')
+    note = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=QuoteStatus.choices, default='sent')
     quoted_by = models.ForeignKey(
         'accounts.User', on_delete=models.SET_NULL, null=True, related_name='quotes_given'
     )
@@ -50,12 +44,14 @@ class Quote(UUIDTimeStampedModel):
     rejected_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(null=True, blank=True)
     revision_count = models.PositiveIntegerField(default=0)  # how many times revised
-
+    tracker = FieldTracker(fields=['status'])
     class Meta:
         ordering = ['-created_at']
         
-    def revise(self, new_amount,user):
-    # store history BEFORE changing
+    def revise(self, new_amount, user):
+        from notifications.service import notify
+        from notifications.models import NotificationType
+
         QuoteRevisionHistory.objects.create(
             quote=self,
             old_amount=self.amount,
@@ -63,12 +59,27 @@ class Quote(UUIDTimeStampedModel):
             revised_by=user,
         )
 
-        # update current state
         self.amount = new_amount
         self.revision_count += 1
         self.status = "revised"
-
         self.save()
+
+        # Notify client of revision
+        recipient = None
+        if self.project and self.project.owner:
+            recipient = self.project.owner
+        elif self.service_request and self.service_request.owner:
+            recipient = self.service_request.owner
+
+        if recipient:
+            notify(
+                recipient=recipient,
+                notification_type=NotificationType.INVOICE_EVENT,
+                title="Quote Revised",
+                message=f"Your quote {self.code} has been revised. New amount: ₦{new_amount}.",
+                actor=user,
+                link=f"/billing/quotes/{self.code}",
+            )
 
     def __str__(self):
         if self.service_request:
@@ -158,12 +169,12 @@ class Invoice(UUIDTimeStampedModel):
         blank=True,
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=InvoiceStatus.choices, default='draft')
+    status = models.CharField(max_length=20, choices=InvoiceStatus.choices, default='sent')
     due_date = models.DateField()
     paid_at = models.DateTimeField(null=True, blank=True)
     note = models.TextField(blank=True)
     code = models.CharField(max_length=30, unique=True)  # e.g. BE-INV-YYMMDD-HHMMSS
-
+    tracker = FieldTracker(fields=['status'])
     class Meta:
         ordering = ['-created_at']
 

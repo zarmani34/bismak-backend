@@ -2,8 +2,15 @@ from rest_framework import serializers
 from .models import Equipment, EquipmentCategory, EquipmentRequest, MaintenanceRequest
 
 
+class EquipmentCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EquipmentCategory
+        fields = ['id', 'name', 'description']
+        read_only_fields = ['id']
+
 class EquipmentListSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    category = EquipmentCategorySerializer(read_only=True)
 
     class Meta:
         model = Equipment
@@ -16,16 +23,30 @@ class EquipmentListSerializer(serializers.ModelSerializer):
 
 class EquipmentDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-
+    category = EquipmentCategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(queryset=EquipmentCategory.objects.all(), source='category', write_only=True, allow_null=True)
+    custom_category = serializers.CharField(write_only=True, allow_null=True)
+    
     class Meta:
         model = Equipment
         fields = [
             'id', 'name', 'category', 'serial_number', 'model',
             'status', 'status_display', 'description',
             'last_maintenance_date', 'next_maintenance_date',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at', 'category_id', 'custom_category'
         ]
         read_only_fields = ['id', 'status', 'last_maintenance_date', 'created_at', 'updated_at']
+        
+    def create(self, validated_data):
+        custom_category = validated_data.pop('custom_category', None)
+
+        if custom_category:
+            category, _ = EquipmentCategory.objects.get_or_create(
+                name=custom_category
+            )
+            validated_data['category'] = category
+
+        return super().create(validated_data)
 
 
 class EquipmentRequestListSerializer(serializers.ModelSerializer):
@@ -37,7 +58,7 @@ class EquipmentRequestListSerializer(serializers.ModelSerializer):
     class Meta:
         model = EquipmentRequest
         fields = [
-            'id', 'equipment_name', 'requested_by', 'project_code',
+            'id','code','equipment_name', 'requested_by', 'project_code',
             'status', 'status_display', 'date_needed', 'created_at'
         ]
 

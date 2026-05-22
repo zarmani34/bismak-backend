@@ -19,8 +19,6 @@ QUOTE_VALID_TRANSITIONS = {
     'accepted': [],
     'rejected': [],
 }
-
-
 class QuoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     lookup_field = 'code'  # Use code instead of id for lookups
@@ -116,7 +114,7 @@ class QuoteViewSet(viewsets.ModelViewSet):
             serializer.save(quoted_by=self.request.user, service_request=service_request)
 
     @action(detail=True, methods=['patch'], url_path='update-status')
-    def update_status(self, request, pk=None):
+    def update_status(self, request, code=None):
         quote = self.get_object()
         new_status = request.data.get('status')
 
@@ -144,14 +142,20 @@ class QuoteViewSet(viewsets.ModelViewSet):
             )
             # update service request status if linked
             if quote.service_request:
-                quote.service_request.status = 'accepted'
+                quote.service_request.status = 'in_progress'
                 quote.service_request.save()
+            elif quote.project:
+                quote.project.status = 'in_progress'
+                quote.project.save()
 
         elif new_status == 'rejected':
             quote.rejected_at = timezone.now()
             if quote.service_request:
-                quote.service_request.status = 'rejected'
+                quote.service_request.status = 'cancelled'
                 quote.service_request.save()
+            elif quote.project:
+                quote.project.status = 'cancelled'
+                quote.project.save()
 
         quote.save()
 
@@ -161,7 +165,6 @@ class QuoteViewSet(viewsets.ModelViewSet):
             'new_status': new_status,
             'allowed_transitions': QUOTE_VALID_TRANSITIONS.get(new_status, [])
         })
-
 
 class InvoiceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]

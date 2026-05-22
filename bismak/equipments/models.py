@@ -1,9 +1,18 @@
 from django.db import models
 from commmon.models import UUIDTimeStampedModel
 from datetime import datetime, date, timedelta
+from model_utils import FieldTracker
 
 # Create your models here.
 
+
+class EquipmentCategory(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+    
 class Equipment(UUIDTimeStampedModel):
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -14,11 +23,11 @@ class Equipment(UUIDTimeStampedModel):
 
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=100, unique=True)  
-    category = models.CharField(max_length=255, blank=True)  # just a text field
+    category = models.ForeignKey(EquipmentCategory, on_delete=models.SET_NULL, null=True, blank=True)
     serial_number = models.CharField(max_length=100, unique=True)
     model = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
-    description = models.TextField(blank=True)
+    description = models.TextField(null=True, blank=True)
     last_maintenance_date = models.DateField(null=True, blank=True)
     next_maintenance_date = models.DateField(null=True, blank=True)
 
@@ -60,6 +69,7 @@ class EquipmentRequest(UUIDTimeStampedModel):
         'projects.Project', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='equipment_requests'
     )
+    code = models.CharField(max_length=100, unique=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     reason = models.TextField(blank=True)  # why staff needs it
     approved_by = models.ForeignKey(
@@ -68,6 +78,7 @@ class EquipmentRequest(UUIDTimeStampedModel):
     )
     date_needed = models.DateField()
     date_returned = models.DateField(null=True, blank=True)
+    tracker = FieldTracker(fields=['status'])
 
     def __str__(self):
         return f"{self.requested_by} requested {self.equipment.name}"
@@ -89,7 +100,7 @@ class EquipmentRequest(UUIDTimeStampedModel):
     
     class Meta:
         ordering = ['-created_at']
-
+# Automate approved by and date returned based on status changes in the view logic, not here in the model, to keep separation of concerns.
 
 class MaintenanceRequest(UUIDTimeStampedModel):
     STATUS_CHOICES = [

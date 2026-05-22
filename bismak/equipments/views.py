@@ -65,6 +65,7 @@ class EquipmentViewSet(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             return [IsAdmin()]
         return [IsAuthenticated()]
+    
 
     @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdmin])
     def update_status(self, request, pk=None):
@@ -92,10 +93,10 @@ class EquipmentRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        equipment_id = self.kwargs.get('equipment_pk')
+        equipment_code = self.kwargs.get('equipment_code')
 
-        if equipment_id:
-            equipment = get_object_or_404(Equipment, id=equipment_id)
+        if equipment_code:
+            equipment = get_object_or_404(Equipment, code=equipment_code)
             if user.role == 'admin':
                 return EquipmentRequest.objects.filter(equipment=equipment)
             return EquipmentRequest.objects.filter(
@@ -135,7 +136,7 @@ class EquipmentRequestViewSet(viewsets.ModelViewSet):
         serializer.save(requested_by=self.request.user)
 
     @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdmin])
-    def update_status(self, request, pk=None):
+    def update_status(self, request, code=None):
         equipment_request = self.get_object()
         new_status = request.data.get('status')
 
@@ -183,10 +184,10 @@ class MaintenanceRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        equipment_id = self.kwargs.get('equipment_pk')
+        equipment_code = self.kwargs.get('equipment_code')
 
-        if equipment_id:
-            equipment = get_object_or_404(Equipment, id=equipment_id)
+        if equipment_code:
+            equipment = get_object_or_404(Equipment, code=equipment_code)
             if user.role == 'admin':
                 return MaintenanceRequest.objects.filter(equipment=equipment)
             return MaintenanceRequest.objects.filter(
@@ -209,7 +210,7 @@ class MaintenanceRequestViewSet(viewsets.ModelViewSet):
         serializer.save(requested_by=self.request.user)
 
     @action(detail=True, methods=['patch'], url_path='update-status', permission_classes=[IsAdmin])
-    def update_status(self, request, pk=None):
+    def update_status(self, request, code=None):
         maintenance_request = self.get_object()
         new_status = request.data.get('status')
 

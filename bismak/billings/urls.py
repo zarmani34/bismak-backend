@@ -3,6 +3,7 @@ from .views import QuoteViewSet, InvoiceViewSet
 
 router = routers.DefaultRouter()
 router.register(r'quotes', QuoteViewSet, basename='quote')
+router.register(r'invoices', InvoiceViewSet, basename='invoice')
 
 quotes_router = routers.NestedDefaultRouter(router, r'quotes', lookup='quote')
 quotes_router.register(r'invoice', InvoiceViewSet, basename='quote-invoice')
