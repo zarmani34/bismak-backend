@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify your email - BISMAK Portal</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #F6F5D9;
+      padding: 40px 16px;
+      color: #4a4a4a;
+    }
+    .wrapper {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #37574a;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      font-size: 13px;
+      color: #8a8a8a;
+      margin-top: 4px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(26, 36, 33, 0.08);
+      overflow: hidden;
+    }
+    .card-top {
+      background: #37574a;
+      padding: 32px 40px;
+      text-align: center;
+    }
+    .card-top .icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .card-top h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .card-top p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.5;
+    }
+    .card-body {
+      padding: 36px 40px;
+    }
+    .greeting {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333333;
+      margin-bottom: 12px;
+    }
+    .message {
+      font-size: 14px;
+      color: #4a4a4a;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .btn-wrapper {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .btn {
+      display: inline-block;
+      background-color: #D95C3E;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 36px;
+      border-radius: 8px;
+      letter-spacing: 0.2px;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #e0ddc7;
+      margin: 24px 0;
+    }
+    .fallback {
+      font-size: 12px;
+      color: #8a8a8a;
+      line-height: 1.6;
+    }
+    .fallback a {
+      color: #37574a;
+      word-break: break-all;
+    }
+    .expiry {
+      display: inline-block;
+      background: #F6F5D9;
+      border: 1px solid #e0ddc7;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #4a4a4a;
+      margin-bottom: 28px;
+      width: 100%;
+      text-align: center;
+    }
+    .expiry strong {
+      color: #D95C3E;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #8a8a8a;
+      line-height: 1.6;
+    }
+    .footer a {
+      color: #37574a;
+      text-decoration: none;
+    }
+
+    @media (max-width: 480px) {
+      .card-top, .card-body { padding: 24px 20px; }
+      .btn { display: block; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>BISMAK</h1>
+      <p>Excel & Technical Services Portal</p>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+
+      <!-- Card Top -->
+      <div class="card-top">
+        <div class="icon">
+          <!-- Email icon -->
+          <svg width="28" height="28" fill="none" stroke="white" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1
+              0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <h2>Verify your email address</h2>
+        <p>One last step before accessing the BISMAK Portal</p>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <p class="greeting">Hello {{ user.first_name }},</p>
+        <p class="message">
+          Welcome to the <strong>BISMAK Excel & Technical Services Portal</strong>. 
+          We're excited to have you on board.<br/><br/>
+          To complete your registration and access your portal, please verify 
+          your email address by clicking the button below.
+        </p>
+
+        <!-- CTA Button -->
+        <div class="btn-wrapper">
+          <a href="{{ activate_url }}" class="btn">
+            Verify Email Address
+          </a>
+        </div>
+
+        <!-- Expiry notice -->
+        <div class="expiry">
+          ⏳ This link expires in <strong>3 days</strong>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Fallback link -->
+        <p class="fallback">
+          If the button doesn't work, copy and paste this link into your browser:<br/>
+          <a href="{{ activate_url }}">{{ activate_url }}</a>
+        </p>
+
+        <hr class="divider" />
+
+        <p class="fallback">
+          If you did not create an account with BISMAK, you can safely ignore this email.
+          Your email address will not be used.
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>
+        &copy; 2026 BISMAK Excel & Technical Services.<br/>
+        Need help? <a href="mailto:info@bismakexcelservice.com">info@bismakexcelservice.com</a>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>

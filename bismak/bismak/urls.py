@@ -17,11 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 
+from accounts.views import AdminRegisterView, ClientRegisterView, StaffRegisterView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('api/auth/', include('dj_rest_auth.urls')),  # covers everything login, logout, reset, reset/confirm, user
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('api/', include('accounts.urls')),
     path('api/', include('projects.urls')),
     path('api/', include('billings.urls')),

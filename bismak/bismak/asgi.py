@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
 
 import os
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bismak.settings.dev')
+
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bismak.settings')
 
 application = get_asgi_application()

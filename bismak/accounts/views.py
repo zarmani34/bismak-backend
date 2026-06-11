@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.db import transaction
 
 # Create your views here.
 from dj_rest_auth.registration.views import RegisterView
@@ -13,13 +14,26 @@ from rest_framework import viewsets
 class StaffRegisterView(RegisterView):
     serializer_class = StaffRegisterSerializer
     permission_classes = [IsAdminUser]
+    
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            return super().perform_create(serializer)
 
 class AdminRegisterView(RegisterView):
     serializer_class = AdminRegisterSerializer
     permission_classes = [IsAdminUser]
     
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            return super().perform_create(serializer)
+    
 class ClientRegisterView(RegisterView):
     serializer_class = ClientRegisterSerializer
+    
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            return super().perform_create(serializer)
+    
     
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer

@@ -1,7 +1,7 @@
 import os
 from celery import Celery
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bismak.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bismak.settings.dev')
 
 app = Celery('bismak')
 app.config_from_object('django.conf:settings', namespace='CELERY')
