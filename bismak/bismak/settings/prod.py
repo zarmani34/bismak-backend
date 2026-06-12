@@ -15,11 +15,14 @@ DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
 
-FRONTEND_URL = os.environ.get('FRONTEND_URL')
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() 
+    for origin in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') 
+    if origin.strip()
+]
 
-ACCOUNT_EMAIL_CONFIRMATION_URL = FRONTEND_URL + '/portal/verify-email/{key}'
-
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', '')
+ACCOUNT_EMAIL_CONFIRMATION_URL = FRONTEND_URL + '/portal/verify-email/{key}' if FRONTEND_URL else ''
 
 # Redis
 REDIS_URL = os.environ.get('REDIS_URL')
