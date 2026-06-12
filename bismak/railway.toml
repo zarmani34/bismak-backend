@@ -3,7 +3,7 @@ builder = "nixpacks"
 
 [deploy]
 startCommand = "daphne -b 0.0.0.0 -p $PORT bismak.asgi:application"
-healthcheckPath = "/api/auth/user/"
+healthcheckPath = "/admin/login/"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 
