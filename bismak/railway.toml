@@ -6,3 +6,6 @@ startCommand = "daphne -b 0.0.0.0 -p $PORT bismak.asgi:application"
 healthcheckPath = "/api/auth/user/"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
+
+[env]
+DJANGO_SETTINGS_MODULE = "bismak.settings.prod"

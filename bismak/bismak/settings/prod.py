@@ -22,13 +22,15 @@ CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
 REDIS_URL = os.environ.get('REDIS_URL')
 
 
-_redis = urllib.parse.urlparse(REDIS_URL)
-EVENTSTREAM_REDIS = {
-    'host': _redis.hostname,
-    'port': _redis.port or 6379,
-    'db': int(_redis.path.lstrip('/') or 0),
-    'password': _redis.password,
-} 
+_redis_url = os.environ.get('REDIS_URL', '')
+if _redis_url:
+    _redis = urllib.parse.urlparse(_redis_url)
+    EVENTSTREAM_REDIS = {
+        'host': _redis.hostname,
+        'port': _redis.port or 6379,
+        'db': int(_redis.path.lstrip('/') or 0),
+        'password': _redis.password,
+    }
 
 CELERY_BROKER_URL = REDIS_URL
 
