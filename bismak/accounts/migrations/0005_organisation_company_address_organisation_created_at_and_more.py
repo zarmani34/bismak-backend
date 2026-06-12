@@ -90,11 +90,16 @@ class Migration(migrations.Migration):
             reverse_sql=migrations.RunSQL.noop,
         ),
 
-        # Step 8 — tell Django's state about the new field
-        migrations.AlterField(
-            model_name='organisation',
-            name='id',
-            field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+        # Replace Step 8 (the AlterField) with this:
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],  # do nothing in DB — raw SQL already handled it
+            state_operations=[
+                migrations.AlterField(
+                    model_name='organisation',
+                    name='id',
+                    field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+            ]
         ),
         
         # Step 9 — re-add organisation_id to user as uuid
