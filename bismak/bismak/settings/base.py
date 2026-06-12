@@ -124,10 +124,10 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'django-db'
 
 # Email (shared)
-EMAIL_HOST = 'smtp.resend.com'
+EMAIL_HOST = 'smtp.office365.com'
 EMAIL_PORT = 587
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False
-EMAIL_HOST_USER = 'resend'
-DEFAULT_FROM_EMAIL = 'BISMAK <noreply@bismakexcelservice.com>'
-SERVER_EMAIL = 'noreply@bismakexcelservice.com'
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'info@bismakexcelservice.com'
+DEFAULT_FROM_EMAIL = 'BISMAK <info@bismakexcelservice.com>'
+SERVER_EMAIL = 'info@bismakexcelservice.com'
