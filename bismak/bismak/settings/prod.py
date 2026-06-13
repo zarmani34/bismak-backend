@@ -54,8 +54,7 @@ REST_AUTH = {
 
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_PASSWORD = os.environ.get('RESEND_API_KEY')
-EMAIL_TIMEOUT = 10  # seconds
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # Static files
 STATIC_ROOT = BASE_DIR / 'staticfiles'
