@@ -1,2 +1,2 @@
-web: python manage.py migrate --noinput && python manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p $PORT bismak.asgi:application
-worker: python -m celery -A bismak worker --loglevel=info
+web: /opt/venv/bin/python manage.py migrate --noinput && /opt/venv/bin/daphne -b 0.0.0.0 -p $PORT bismak.asgi:application
+worker: /opt/venv/bin/python -m celery -A bismak worker --loglevel=info
