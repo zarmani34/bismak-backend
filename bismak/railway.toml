@@ -2,11 +2,21 @@
 builder = "nixpacks"
 buildCommand = "python manage.py collectstatic --noinput"
 
-[deploy]
+[env]
+DJANGO_SETTINGS_MODULE = "bismak.settings.prod"
+
+[[services]]
+name = "bismak-backend"
+
+[services.deploy]
 startCommand = "/opt/venv/bin/python manage.py migrate --noinput && /opt/venv/bin/daphne -b 0.0.0.0 -p $PORT bismak.asgi:application"
 healthcheckPath = "/admin/login/"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 
-[env]
-DJANGO_SETTINGS_MODULE = "bismak.settings.prod"
+[[services]]
+name = "bismak-celery"
+
+[services.deploy]
+startCommand = "/opt/venv/bin/python -m celery -A bismak worker --loglevel=info"
+restartPolicyType = "on_failure"
