@@ -126,8 +126,8 @@ CELERY_RESULT_BACKEND = 'django-db'
 # Email (shared)
 EMAIL_HOST = 'smtp.resend.com'
 EMAIL_PORT = 587
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'resend'
 DEFAULT_FROM_EMAIL = 'BISMAK <noreply@bismakexcelservice.com>'
 SERVER_EMAIL = 'noreply@bismakexcelservice.com'
