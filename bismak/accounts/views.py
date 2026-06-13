@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404, render
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
 
 # Create your views here.
 from dj_rest_auth.registration.views import RegisterView
@@ -17,7 +19,12 @@ class StaffRegisterView(RegisterView):
     
     def perform_create(self, serializer):
         with transaction.atomic():
-            return super().perform_create(serializer)
+            try:
+                return super().perform_create(serializer)
+            except IntegrityError:
+                raise ValidationError({
+                    'email': ['A user with this email already exists.']
+                })
 
 class AdminRegisterView(RegisterView):
     serializer_class = AdminRegisterSerializer
@@ -25,14 +32,24 @@ class AdminRegisterView(RegisterView):
     
     def perform_create(self, serializer):
         with transaction.atomic():
-            return super().perform_create(serializer)
+            try:
+                return super().perform_create(serializer)
+            except IntegrityError:
+                raise ValidationError({
+                    'email': ['A user with this email already exists.']
+                })
     
 class ClientRegisterView(RegisterView):
     serializer_class = ClientRegisterSerializer
     
     def perform_create(self, serializer):
         with transaction.atomic():
-            return super().perform_create(serializer)
+            try:
+                return super().perform_create(serializer)
+            except IntegrityError:
+                raise ValidationError({
+                    'email': ['A user with this email already exists.']
+                })
     
     
 class UserViewSet(viewsets.ModelViewSet):

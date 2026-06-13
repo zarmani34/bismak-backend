@@ -10,6 +10,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return f"{frontend_url}/portal/verify-email/{key}"
 
     def send_mail(self, template_prefix, email, context):
+
         from accounts.tasks import send_allauth_email_task
         safe_context = {}
         for key, value in context.items():
