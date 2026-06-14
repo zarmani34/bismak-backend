@@ -77,7 +77,7 @@ class User(AbstractUser):
         return f"{prefix}-{str(count).zfill(4)}" 
     
     def save(self, *args, **kwargs):
-        if not self.user_id and self.role in ('staff', 'admin'):
+        if not self.user_id:
             self.user_id = self.generate_user_id()
         super().save(*args, **kwargs)
 
