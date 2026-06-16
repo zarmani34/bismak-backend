@@ -48,8 +48,6 @@ REST_AUTH = {
     'JWT_AUTH_REFRESH_COOKIE': 'refresh-token',
     'JWT_AUTH_HTTPONLY': True,   # secure in prod
     'JWT_AUTH_SECURE': True,     # HTTPS only
-    'JWT_AUTH_HTTPONLY': True,
-    'JWT_AUTH_SECURE': True,
     'JWT_AUTH_SAMESITE': 'Lax',
     'JWT_AUTH_COOKIE_DOMAIN': '.bismakexcelservice.com',
     'JWT_SERIALIZER': 'accounts.serializers.CustomJWTSerializer',

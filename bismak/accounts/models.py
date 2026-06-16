@@ -80,6 +80,10 @@ class User(AbstractUser):
         if not self.user_id:
             self.user_id = self.generate_user_id()
         super().save(*args, **kwargs)
+        
+    class Meta:
+        ordering = ['email']
+        
 
 
 # To add other organizational user types like contractors, suppliers etc, we can either:
