@@ -8,7 +8,6 @@ EMAIL_NOTIFICATION_TYPES = {
     NotificationType.PROJECT_ASSIGNED,
     NotificationType.STATUS_UPDATE,
     NotificationType.INVOICE_EVENT,
-    NotificationType.NEW_MESSAGE,
 }
 
 

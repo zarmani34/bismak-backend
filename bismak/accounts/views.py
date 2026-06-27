@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import  ClientRegisterSerializer, StaffRegisterSerializer, AdminRegisterSerializer, UserSerializer
+from .serializers import  ClientRegisterSerializer, CustomUserDetailsSerializer, StaffRegisterSerializer, AdminRegisterSerializer, UserSerializer
 from rest_framework import viewsets
 
 class StaffRegisterView(RegisterView):
@@ -53,7 +53,7 @@ class ClientRegisterView(RegisterView):
     
     
 class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
+    serializer_class = CustomUserDetailsSerializer
     permission_classes = [IsAdminUser]
     lookup_field = 'user_id'
     
@@ -65,7 +65,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='staffs')
     def staff_list(self, request):
         staffs = User.objects.filter(role='staff')
-        serializer = UserSerializer(staffs, many=True)
+        serializer = CustomUserDetailsSerializer(staffs, many=True)
         return Response(serializer.data)
             
 

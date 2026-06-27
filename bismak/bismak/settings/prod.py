@@ -21,6 +21,7 @@ CORS_ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 FRONTEND_URL = os.environ.get('FRONTEND_URL', '')
 ACCOUNT_EMAIL_CONFIRMATION_URL = FRONTEND_URL + '/portal/verify-email/{key}' if FRONTEND_URL else ''
 

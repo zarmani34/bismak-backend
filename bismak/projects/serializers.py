@@ -68,7 +68,7 @@ class PressureTestSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'project',
             # Client & Location
-            'client', 'location_address', 'client_representative', 'dpr_in_charge',
+            'client', 'location_address', 'client_representative',
             # Equipment Details
             'manufacturer', 'manufacturing_date', 'serial_no', 'truck_no',
             'tank_capacity', 'product_stored', 'tank_type',

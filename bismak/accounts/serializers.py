@@ -22,8 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='get_full_name', read_only=True)
     class Meta:
         model = User
-        fields = ['full_name', 'email', 'user_id', 'role']
-        read_only_fields = ['email', 'full_name', 'user_id', 'role']
+        fields = ['full_name', 'email', 'user_id', 'role', 'date_joined', 'last_login']
+        read_only_fields = ['email', 'full_name', 'user_id', 'role', 'date_joined']
         
 
 
@@ -69,12 +69,13 @@ class StaffRegisterSerializer(RegisterSerializer):
     username = None
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-    employee_id = serializers.CharField(read_only=True)
+    phone_number = serializers.CharField(required=True)
     
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
         data['first_name'] = self.validated_data.get('first_name', '')
         data['last_name'] = self.validated_data.get('last_name', '')
+        data['phone_number'] = self.validated_data.get('phone_number', '')
         return data
 
     def save(self, request):
@@ -82,6 +83,8 @@ class StaffRegisterSerializer(RegisterSerializer):
         user.role = 'staff'
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
+        user.phone_number = self.cleaned_data['phone_number']
+        user.user_id = user.generate_user_id()  # Generate user_id for staff
         user.save()
         return user
 
@@ -90,12 +93,13 @@ class AdminRegisterSerializer(RegisterSerializer):
     username = None
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-    employee_id = serializers.CharField(read_only=True)
-    
+    phone_number = serializers.CharField(required=True)
+
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
         data['first_name'] = self.validated_data.get('first_name', '')
         data['last_name'] = self.validated_data.get('last_name', '')
+        data['phone_number'] = self.validated_data.get('phone_number', '')
         return data
 
     def save(self, request):
@@ -103,6 +107,8 @@ class AdminRegisterSerializer(RegisterSerializer):
         user.role = 'admin'
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
+        user.phone_number = self.cleaned_data['phone_number']
+        user.user_id = user.generate_user_id()  # Generate user_id for admin
         user.is_staff = True
         user.is_superuser = True
         user.save()

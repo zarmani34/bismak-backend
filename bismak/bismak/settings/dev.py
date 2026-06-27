@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv(BASE_DIR / '.env')
 
+
 DEBUG = True
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-fallback-key')
@@ -16,6 +17,8 @@ DATABASES = {
         'OPTIONS': {'timeout': 20},
     }
 }
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disable email verification in development
 
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 

@@ -155,7 +155,6 @@ class LeakTest(UUIDTimeStampedModel):
     station_name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     client_representative = models.CharField(max_length=255)
-    dpr_in_charge = models.CharField(max_length=255)
     
     # Test Details
     age_of_tank = models.PositiveIntegerField(default=0)  # in years

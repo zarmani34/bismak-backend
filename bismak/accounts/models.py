@@ -44,8 +44,7 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, blank=True)
-    user_id = models.CharField(max_length=30, blank=True, unique=True, null=True)  # Only for staff and admin, auto-generated based on role and count of existing users in that role
-    
+    user_id = models.CharField(max_length=30, blank=True, unique=True, null=True)  
     ROLE_CHOICES = (
         ('admin', 'Admin'),
         ('staff', 'Staff'),

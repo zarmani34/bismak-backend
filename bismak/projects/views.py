@@ -181,7 +181,7 @@ class TimelineEventViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user, project=project)
 
 class BaseProjectTypeViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrStaff]
+    # permission_classes = [IsAdminOrStaff]
     
     def get_project(self):
         project_code = self.kwargs.get('project_code')
