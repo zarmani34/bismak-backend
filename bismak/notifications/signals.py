@@ -23,6 +23,22 @@ def get_all_admins():
 
 # ─── Projects ────────────────────────────────────────────────────────────────
 
+@receiver(post_save, sender=Project)
+def on_project_created(sender, instance, created, **kwargs):
+    """Notify all admins when a new project is created."""
+    if not created:
+        return
+    
+    for admin in get_all_admins():
+        notify(
+            recipient=admin,
+            notification_type=NotificationType.PROJECT_ASSIGNED,
+            title="New Project Created",
+            message=f"{instance.owner.get_full_name()} created a new project {instance.code} — {instance.company}.",
+            actor=instance.owner,
+            link=f"/projects/{instance.code}",
+        )
+
 @receiver(post_save, sender=ProjectAssignment)
 def on_project_assignment_created(sender, instance, created, **kwargs):
     """

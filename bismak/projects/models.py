@@ -32,7 +32,7 @@ class Project(UUIDTimeStampedModel):
     due_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True)
     executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="executed_projects", limit_choices_to={"role__in": ["staff", "admin"]})
-    FieldTracker = FieldTracker(fields=['status'])
+    tracker = FieldTracker(fields=['status'])
     class Meta:
         ordering = ["-created_at"]
 
