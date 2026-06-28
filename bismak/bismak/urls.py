@@ -32,7 +32,9 @@ urlpatterns = [
     path('api/', include('equipments.urls')),
     path('api/', include('notifications.urls')),
     re_path(
-    r'^api/notifications/stream/',
-    include('django_eventstream.urls')
+    r'^api/notifications/stream/(?P<user_id>[^/]+)/$',
+    include('django_eventstream.urls'),
+    {'format-channels': ['notifications-{user_id}']}
+
 ),
 ]
