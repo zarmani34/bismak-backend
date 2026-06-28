@@ -8,7 +8,7 @@ from services.models import ServiceRequest
 from equipments.models import EquipmentRequest
 from billings.models import Invoice, Quote
 
-from .service import notify
+from .service import notify, build_portal_link
 from .models import NotificationType
 
 User = get_user_model()
@@ -60,7 +60,7 @@ def on_project_assignment_created(sender, instance, created, **kwargs):
         title="You've Been Assigned to a Project",
         message=f"You have been assigned to project {project.code} — {project.company}.",
         actor=assigned_by,
-        link=f"/projects/{project.code}",
+        link=build_portal_link(assignee, f"/projects/{project.code}"),
     )
 
     # Notify the project owner (client)
@@ -71,7 +71,7 @@ def on_project_assignment_created(sender, instance, created, **kwargs):
             title="Your Project Has Been Assigned",
             message=f"A team member has been assigned to work on your project {project.code}.",
             actor=assigned_by,
-            link=f"/projects/{project.code}",
+            link=build_portal_link(project.owner, f"/projects/{project.code}")
         )
 
 
@@ -95,7 +95,7 @@ def on_project_status_changed(sender, instance, created, **kwargs):
         notification_type=NotificationType.STATUS_UPDATE,
         title="Project Status Updated",
         message=f"Your project {instance.code} status has been updated to: {instance.get_status_display()}.",
-        link=f"/projects/{instance.code}",
+        link=build_portal_link(instance.owner, f"/projects/{instance.code}"),
     )
 
 
@@ -117,7 +117,7 @@ def on_service_request_created(sender, instance, created, **kwargs):
             title="New Service Request Submitted",
             message=f"{instance.owner.get_full_name()} submitted a service request ({instance.code}) for {instance.get_service_name()}.",
             actor=instance.owner,
-            link=f"/services/{instance.code}",
+            link=build_portal_link(admin, f"/services/{instance.code}"),
         )
 
 
@@ -138,7 +138,7 @@ def on_service_request_status_changed(sender, instance, created, **kwargs):
         notification_type=NotificationType.STATUS_UPDATE,
         title="Service Request Updated",
         message=f"Your service request {instance.code} status has been updated to: {instance.get_status_display()}.",
-        link=f"/services/{instance.code}",
+        link=build_portal_link(instance.owner, f"/services/{instance.code}"),
     )
 
 
@@ -160,7 +160,7 @@ def on_equipment_request_created(sender, instance, created, **kwargs):
             title="New Equipment Request",
             message=f"{instance.requested_by.get_full_name()} requested {instance.equipment.name} ({instance.code}).",
             actor=instance.requested_by,
-            link=f"/equipments/requests/{instance.code}",
+            link=build_portal_link(admin, f"/equipments/requests/{instance.code}"),
         )
 
 
@@ -187,7 +187,7 @@ def on_equipment_request_status_changed(sender, instance, created, **kwargs):
         title="Equipment Request Updated",
         message=f"Your equipment request {instance.code} for {instance.equipment.name} has been {status_display.lower()}.",
         actor=instance.approved_by,
-        link=f"/equipments/requests/{instance.code}",
+        link=build_portal_link(instance.requested_by, f"/equipments/requests/{instance.code}"),
     )
 
 
@@ -211,7 +211,7 @@ def on_invoice_created(sender, instance, created, **kwargs):
         notification_type=NotificationType.INVOICE_EVENT,
         title="New Invoice Issued",
         message=f"A new invoice {instance.code} of ₦{instance.amount} has been issued to you. Due date: {instance.due_date}.",
-        link=f"/billing/invoices/{instance.code}",
+        link=build_portal_link(recipient, f"/billing/invoices/{instance.code}"),
     )
 
 
@@ -236,7 +236,7 @@ def on_invoice_paid(sender, instance, created, **kwargs):
             notification_type=NotificationType.INVOICE_EVENT,
             title="Invoice Payment Received",
             message=f"Invoice {instance.code} of ₦{instance.amount} has been marked as paid.",
-            link=f"/billing/invoices/{instance.code}",
+            link=build_portal_link(admin, f"/billing/invoices/{instance.code}"),
         )
 
 
@@ -259,7 +259,7 @@ def on_quote_sent(sender, instance, created, **kwargs):
         title="You've Received a Quote",
         message=f"A quote {instance.code} of ₦{instance.amount} has been sent to you. Valid until: {instance.valid_until}.",
         actor=instance.quoted_by,
-        link=f"/billing/quotes/{instance.code}",
+        link=build_portal_link(recipient, f"/billing/quotes/{instance.code}"),
     )
 
 

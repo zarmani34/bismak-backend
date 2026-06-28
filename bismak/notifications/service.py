@@ -66,3 +66,14 @@ def _maybe_send_email(notification):
             message=notification.message,
             link=notification.link,
         )
+        
+        
+def build_portal_link(user, path):
+    """Build a role-aware portal link for a user."""
+    role_prefix = {
+        'admin': '/portal/admin',
+        'staff': '/portal/staff',
+        'client': '/portal/client',
+    }
+    prefix = role_prefix.get(user.role, '/portal')
+    return f"{prefix}{path}"
